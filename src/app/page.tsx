@@ -485,18 +485,19 @@ export default function Home() {
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn bg-black">
+        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
             <div 
-              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center"
+              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center relative z-0"
               style={{
-                backgroundImage: "url('/Interviewer-woman.png')"
+                backgroundImage: "url('/Interviewer-woman.png')",
+                minHeight: "100vh"
               }}
             >
               {/* Timer Display */}
-              <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2">
+              <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
                 <div className={`
                   px-3 py-1 rounded text-2xl font-mono font-bold
                   ${interviewTime <= 60 ? 'text-red-500' : 'text-white'}
@@ -506,7 +507,7 @@ export default function Home() {
               </div>
               
               {/* Microphone Button */}
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
                 <button
                   onClick={toggleMic}
                   className={`
@@ -540,7 +541,7 @@ export default function Home() {
               </div>
               
               {/* Progress Bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700 z-10">
                 <div 
                   className="h-full bg-white transition-all duration-1000 ease-linear"
                   style={{
