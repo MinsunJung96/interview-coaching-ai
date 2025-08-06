@@ -613,7 +613,7 @@ export default function Home() {
               {/* Voice Expression */}
               <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
                 {isInterviewerSpeaking ? (
-                  <div className="flex items-end space-x-1 h-8">
+                  <div className="flex items-end justify-center space-x-1 h-8 w-16">
                     {[1, 2, 3, 4].map((bar) => (
                       <div
                         key={bar}
@@ -665,7 +665,7 @@ export default function Home() {
                 >
                   {isMicOn ? (
                     <Image 
-                      src="/mic-on.png" 
+                      src="/mic-on.svg" 
                       alt="Microphone On" 
                       width={40} 
                       height={40}
@@ -674,7 +674,7 @@ export default function Home() {
                     />
                   ) : (
                     <Image 
-                      src="/mic-off.png" 
+                      src="/mic-off.svg" 
                       alt="Microphone Off" 
                       width={40} 
                       height={40}
