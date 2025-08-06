@@ -254,14 +254,14 @@ export default function Home() {
   // 클라이언트에서만 렌더링 (Hydration 에러 방지)
   if (!isClient) {
     return (
-      <div className="text-white min-h-screen flex flex-col items-center justify-center">
+      <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center">
         <div className="text-xl">로딩 중...</div>
       </div>
     );
   }
 
   return (
-    <div className="text-white min-h-screen flex flex-col">
+    <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
       <div className="flex items-center p-4">
