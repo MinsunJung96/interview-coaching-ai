@@ -148,6 +148,7 @@ export default function Home() {
   const [isListening, setIsListening] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [currentInterviewerText, setCurrentInterviewerText] = useState("");
+  const [isInterviewerMouthOpen, setIsInterviewerMouthOpen] = useState(false);
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -250,6 +251,8 @@ export default function Home() {
         if (recognition) {
           recognition.stop();
         }
+        // 입 움직임 시작
+        setIsInterviewerMouthOpen(true);
       };
       
       utterance.onend = () => {
@@ -259,6 +262,38 @@ export default function Home() {
         if (recognition) {
           recognition.start();
         }
+        // 입 움직임 종료
+        setIsInterviewerMouthOpen(false);
+      };
+      
+      // 음성 진행 중 입 움직임 애니메이션
+      let mouthAnimationInterval: NodeJS.Timeout;
+      
+      utterance.onstart = () => {
+        setIsInterviewerSpeaking(true);
+        setCurrentInterviewerText(text);
+        setIsMicOn(false);
+        if (recognition) {
+          recognition.stop();
+        }
+        
+        // 입 움직임 애니메이션 시작 (0.2초마다 토글)
+        mouthAnimationInterval = setInterval(() => {
+          setIsInterviewerMouthOpen(prev => !prev);
+        }, 200);
+      };
+      
+      utterance.onend = () => {
+        setIsInterviewerSpeaking(false);
+        setCurrentInterviewerText("");
+        setIsMicOn(true);
+        if (recognition) {
+          recognition.start();
+        }
+        
+        // 입 움직임 애니메이션 종료
+        clearInterval(mouthAnimationInterval);
+        setIsInterviewerMouthOpen(false);
       };
       
       speechSynthesis.speak(utterance);
@@ -708,6 +743,18 @@ export default function Home() {
                 backgroundRepeat: "no-repeat"
               }}
             >
+              {/* Interviewer Mouth Animation Overlay */}
+              {isInterviewerSpeaking && (
+                <div className="absolute inset-0 z-5 pointer-events-none">
+                  <div 
+                    className="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 w-20 h-10 
+                               bg-black bg-opacity-40 rounded-full animate-mouth"
+                    style={{
+                      transform: 'translateX(-50%)'
+                    }}
+                  ></div>
+                </div>
+              )}
               {/* Timer Display */}
               <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
                 <div className={`

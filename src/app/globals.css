@@ -59,3 +59,16 @@ body {
 .animate-voice-bar {
   animation: voiceBar 0.8s ease-in-out infinite;
 }
+
+@keyframes mouthMove {
+  0%, 100% {
+    transform: translateX(-50%) scaleY(0.3);
+  }
+  50% {
+    transform: translateX(-50%) scaleY(1.2);
+  }
+}
+
+.animate-mouth {
+  animation: mouthMove 0.3s ease-in-out infinite;
+}
