@@ -122,6 +122,9 @@ export default function Home() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
+  const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -136,8 +139,8 @@ export default function Home() {
       setCountdown(10);
       setIsTimerComplete(false);
     } else if (step === 3 && isTimerComplete) {
-      // 면접 시작
-      console.log("면접 시작:", { university: selectedUniversity, major: selectedMajor });
+      setStep(4);
+      setInterviewTime(600); // 10분 타이머 시작
     }
   };
 
@@ -151,6 +154,18 @@ export default function Home() {
     setSelectedMajor(major);
     setSearchTerm(major);
     setIsDropdownOpen(false);
+  };
+
+  const toggleMic = () => {
+    if (!isInterviewerSpeaking) {
+      setIsMicOn(!isMicOn);
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   // 선택된 대학의 전공 리스트 가져오기
@@ -179,6 +194,8 @@ export default function Home() {
   // 타이머 로직
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
+    
+    // 대기실 10초 카운트다운
     if (step === 3 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
@@ -190,11 +207,37 @@ export default function Home() {
         });
       }, 1000);
     }
+    
+    // 면접 10분 타이머
+    if (step === 4 && interviewTime > 0) {
+      timer = setInterval(() => {
+        setInterviewTime((prev) => prev - 1);
+      }, 1000);
+    }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [step, countdown]);
+  }, [step, countdown, interviewTime]);
+
+  // 면접관 말하기 시뮬레이션
+  useEffect(() => {
+    if (step === 4) {
+      // 면접 시작 후 5초 뒤에 첫 질문
+      const firstQuestion = setTimeout(() => {
+        setIsInterviewerSpeaking(true);
+        setIsMicOn(false); // 면접관이 말할 때 마이크 자동 OFF
+        
+        // 10초간 질문한 후 멈춤
+        setTimeout(() => {
+          setIsInterviewerSpeaking(false);
+          setIsMicOn(true); // 질문 끝나면 마이크 자동 ON
+        }, 10000);
+      }, 5000);
+
+      return () => clearTimeout(firstQuestion);
+    }
+  }, [step]);
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col">
@@ -213,6 +256,14 @@ export default function Home() {
               setStep(2);
               setCountdown(10);
               setIsTimerComplete(false);
+            } else if (step === 4) {
+              // 면접 중에는 나가기 확인
+              if (confirm("면접을 종료하시겠습니까?")) {
+                setStep(1);
+                setInterviewTime(600);
+                setIsMicOn(true);
+                setIsInterviewerSpeaking(false);
+              }
             }
           }}
         >
@@ -407,6 +458,82 @@ export default function Home() {
                   {isTimerComplete ? "면접장 들어가기" : `면접장 들어가기 ${countdown}초 전`}
                 </span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Interview Screen */}
+      {step === 4 && (
+        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
+          {/* Main Interview Video Area */}
+          <div className="flex-1 relative bg-gray-900">
+            {/* Interviewer Video Placeholder */}
+            <div className="w-full h-full flex items-center justify-center relative">
+              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-32 h-32 bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className="text-gray-400">면접관</p>
+                </div>
+              </div>
+              
+              {/* Timer Display */}
+              <div className="absolute top-4 right-4">
+                <div className={`
+                  px-4 py-2 rounded-lg text-lg font-bold
+                  ${interviewTime <= 60 ? 'bg-red-600 text-white' : 'bg-black bg-opacity-70 text-white'}
+                `}>
+                  {formatTime(interviewTime)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Controls */}
+          <div className="bg-black bg-opacity-80 p-6">
+            <div className="flex justify-center">
+              {/* Microphone Button */}
+              <button
+                onClick={toggleMic}
+                disabled={isInterviewerSpeaking}
+                className={`
+                  w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200
+                  ${isInterviewerSpeaking 
+                    ? 'bg-gray-600 cursor-not-allowed' 
+                    : isMicOn 
+                      ? 'bg-white text-black hover:bg-gray-200' 
+                      : 'bg-red-600 text-white hover:bg-red-700'
+                  }
+                `}
+              >
+                {isMicOn ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" fill="currentColor"/>
+                    <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 3l18 18M9.5 9.5a3 3 0 0 0 0 1.5v2a3 3 0 0 0 5.5 1.5M12 2a3 3 0 0 1 3 3v3M19 10v1a7 7 0 0 1-.64 3.08M12 18v4M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+            
+            {/* Mic Status Text */}
+            <div className="text-center mt-3">
+              <p className={`text-sm ${isMicOn ? 'text-green-400' : 'text-red-400'}`}>
+                {isInterviewerSpeaking 
+                  ? '면접관이 질문 중입니다' 
+                  : isMicOn 
+                    ? '마이크가 켜져 있습니다' 
+                    : '마이크가 꺼져 있습니다'
+                }
+              </p>
             </div>
           </div>
         </div>
