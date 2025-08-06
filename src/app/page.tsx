@@ -469,12 +469,7 @@ export default function Home() {
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
-            <div 
-              className="w-full h-full bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 600\"><rect fill=\"%23f5e6d3\" width=\"400\" height=\"600\"/><circle fill=\"%23d4b896\" cx=\"200\" cy=\"180\" r=\"80\"/><rect fill=\"%232d3748\" x=\"120\" y=\"280\" width=\"160\" height=\"200\" rx=\"20\"/><rect fill=\"%23ffffff\" x=\"140\" y=\"320\" width=\"120\" height=\"80\" rx=\"10\"/></svg>')"
-              }}
-            >
+            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
               {/* Timer Display */}
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
                 <div className={`
