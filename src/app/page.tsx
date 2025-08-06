@@ -663,25 +663,14 @@ export default function Home() {
                     }
                   `}
                 >
-                  {isMicOn ? (
-                    <Image 
-                      src="/mic-on.svg" 
-                      alt="Microphone On" 
-                      width={100} 
-                      height={100}
-                      className="object-contain"
-                      priority
-                    />
-                  ) : (
-                    <Image 
-                      src="/mic-off.svg" 
-                      alt="Microphone Off" 
-                      width={100} 
-                      height={100}
-                      className="object-contain"
-                      priority
-                    />
-                  )}
+                  <Image 
+                    src={isMicOn ? "/mic-on.svg" : "/mic-off.svg"} 
+                    alt={isMicOn ? "Microphone On" : "Microphone Off"} 
+                    width={80} 
+                    height={80}
+                    className="object-contain"
+                    priority
+                  />
                 </button>
               </div>
               
