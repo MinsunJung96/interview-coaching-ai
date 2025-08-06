@@ -15,7 +15,7 @@ const universities = [
   { id: 9, name: "서강대학교", logo: "/9-서강대학교.png", bg: "bg-[#A0522D]" },
 ];
 
-const majorsByUniversity = {
+const majorsByUniversity: { [key: string]: string[] } = {
   "서울대학교": [
     "국어국문학과", "영어영문학과", "불어불문학과", "독어독문학과", "노어노문학과", "중어중문학과", "일어일문학과", "언어학과", "국사학과", "동양사학과", "서양사학과", "고고미술사학과", "철학과", "종교학과", "미학과", "인문대학 자유전공학부",
     "정치외교학부", "경제학부", "사회학과", "인류학과", "심리학과", "지리학과", "사회복지학과", "언론정보학과", "사회과학대학 자유전공학부",
@@ -141,13 +141,13 @@ export default function Home() {
     }
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
     setIsDropdownOpen(value.length > 0);
   };
 
-  const handleMajorSelect = (major) => {
+  const handleMajorSelect = (major: string) => {
     setSelectedMajor(major);
     setSearchTerm(major);
     setIsDropdownOpen(false);
@@ -163,8 +163,9 @@ export default function Home() {
 
   // 화면 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.dropdown-container')) {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.dropdown-container')) {
         setIsDropdownOpen(false);
       }
     };
@@ -177,7 +178,7 @@ export default function Home() {
 
   // 타이머 로직
   useEffect(() => {
-    let timer;
+    let timer: NodeJS.Timeout | undefined;
     if (step === 3 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
