@@ -377,6 +377,7 @@ export default function Home() {
       // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
         const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
+        setConversationHistory([`면접관: ${initialQuestion}`]);
         speakInterviewerResponse(initialQuestion);
       }, 3000);
 
@@ -669,8 +670,8 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Conversation Display */}
-              <div className="absolute top-20 left-4 right-4 max-h-40 overflow-y-auto z-10">
+              {/* Conversation Display - 화면에 표시하지 않음 */}
+              {/* <div className="absolute top-20 left-4 right-4 max-h-40 overflow-y-auto z-10">
                 <div className="bg-black bg-opacity-50 rounded-lg p-3 text-white text-sm">
                   {isInterviewerSpeaking && currentInterviewerText ? (
                     <div className="mb-2">
@@ -686,7 +687,7 @@ export default function Home() {
                     <div className="text-gray-400">면접이 시작되면 대화가 여기에 표시됩니다.</div>
                   )}
                 </div>
-              </div>
+              </div> */}
               
               {/* Microphone Button */}
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
