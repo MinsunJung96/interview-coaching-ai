@@ -497,7 +497,7 @@ export default function Home() {
                 >
                   {isMicOn ? (
                     <Image 
-                      src="/mic-on.svg" 
+                      src="/mic-on.png" 
                       alt="Microphone On" 
                       width={28} 
                       height={28}
@@ -505,7 +505,7 @@ export default function Home() {
                     />
                   ) : (
                     <Image 
-                      src="/mic-off.svg" 
+                      src="/mic-off.png" 
                       alt="Microphone Off" 
                       width={28} 
                       height={28}
