@@ -3,6 +3,17 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+// Hydration 에러 방지
+function useClientOnly() {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
+  return isClient;
+}
+
 const universities = [
   { id: 1, name: "서울대학교", logo: "/1-서울대학교.png", bg: "bg-[#1E3A8A]" },
   { id: 2, name: "카이스트", logo: "/2-카이스트.png", bg: "bg-[#1E40AF]" },
@@ -115,6 +126,7 @@ interface University {
 }
 
 export default function Home() {
+  const isClient = useClientOnly();
   const [step, setStep] = useState(1);
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   const [selectedMajor, setSelectedMajor] = useState("");
@@ -238,6 +250,15 @@ export default function Home() {
       return () => clearTimeout(firstQuestion);
     }
   }, [step]);
+
+  // 클라이언트에서만 렌더링 (Hydration 에러 방지)
+  if (!isClient) {
+    return (
+      <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center">
+        <div className="text-xl">로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col">
