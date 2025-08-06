@@ -107,16 +107,23 @@ const majorsByUniversity = {
   ]
 };
 
+interface University {
+  id: number;
+  name: string;
+  logo: string;
+  bg: string;
+}
+
 export default function Home() {
   const [step, setStep] = useState(1);
-  const [selectedUniversity, setSelectedUniversity] = useState(null);
+  const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [countdown, setCountdown] = useState(10);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
 
-  const handleUniversitySelect = (university: any) => {
+  const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
   };
 
