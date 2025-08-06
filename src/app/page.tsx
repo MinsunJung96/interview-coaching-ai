@@ -183,23 +183,55 @@ export default function Home() {
   const [recognition, setRecognition] = useState<any>(null);
 
   // 면접관 응답 처리
-  const handleUserResponse = (userInput: string) => {
+  const handleUserResponse = async (userInput: string) => {
     // 대화 기록에 사용자 발화 추가
     setConversationHistory(prev => [...prev, `사용자: ${userInput}`]);
     
-    // 면접관 AI 응답 생성 (간단한 규칙 기반)
-    const responses = [
-      "흥미로운 답변이네요. 그 부분에 대해 더 자세히 설명해주실 수 있나요?",
-      "좋은 관점입니다. 실제 경험에서 그런 상황을 어떻게 해결하셨나요?",
-      "이해했습니다. 그렇다면 팀워크 측면에서는 어떻게 생각하시나요?",
-      "매우 구체적인 답변이었습니다. 혹시 어려움이 있었던 부분은 없었나요?",
-      "좋은 답변입니다. 앞으로의 계획은 어떻게 되시나요?"
-    ];
-    
-    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    
-    // 면접관 음성 합성 (대화 기록에는 추가하지 않음)
-    speakInterviewerResponse(randomResponse);
+    try {
+      // OpenAI API 호출
+      const response = await fetch('/api/interview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content: '당신은 전문적인 면접관입니다. 지원자의 답변에 대해 자연스럽고 전문적으로 질문하세요. 답변은 한국어로 해주세요.'
+            },
+            ...conversationHistory.map(msg => ({
+              role: msg.startsWith('사용자:') ? 'user' : 'assistant',
+              content: msg.replace(/^(사용자|면접관): /, '')
+            })),
+            {
+              role: 'user',
+              content: userInput
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('API 호출 실패');
+      }
+
+      const data = await response.json();
+      const aiResponse = data.message;
+      
+      // 면접관 음성 합성
+      speakInterviewerResponse(aiResponse);
+    } catch (error) {
+      console.error('OpenAI API 오류:', error);
+      // 오류 시 기본 응답 사용
+      const fallbackResponses = [
+        "흥미로운 답변이네요. 그 부분에 대해 더 자세히 설명해주실 수 있나요?",
+        "좋은 관점입니다. 실제 경험에서 그런 상황을 어떻게 해결하셨나요?",
+        "이해했습니다. 그렇다면 팀워크 측면에서는 어떻게 생각하시나요?"
+      ];
+      const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+      speakInterviewerResponse(fallbackResponse);
+    }
   };
 
   // 면접관 음성 합성
