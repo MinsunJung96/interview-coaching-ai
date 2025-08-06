@@ -490,10 +490,13 @@ export default function Home() {
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
             <div 
-              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center relative z-0"
+              className="w-full h-full bg-contain bg-center bg-no-repeat flex items-center justify-center relative z-0"
               style={{
                 backgroundImage: "url('/Interviewer-woman.png')",
-                minHeight: "100vh"
+                minHeight: "100vh",
+                backgroundSize: "contain",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
               }}
             >
               {/* Timer Display */}
