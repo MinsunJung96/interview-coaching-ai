@@ -169,9 +169,8 @@ export default function Home() {
   };
 
   const toggleMic = () => {
-    if (!isInterviewerSpeaking) {
-      setIsMicOn(!isMicOn);
-    }
+    // 면접관이 말하고 있어도 사용자가 수동으로 마이크 제어 가능
+    setIsMicOn(!isMicOn);
   };
 
   const formatTime = (seconds: number) => {
@@ -510,14 +509,11 @@ export default function Home() {
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
                 <button
                   onClick={toggleMic}
-                  disabled={isInterviewerSpeaking}
                   className={`
                     w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4
-                    ${isInterviewerSpeaking 
-                      ? 'bg-gray-600 border-gray-500 cursor-not-allowed' 
-                      : isMicOn 
-                        ? 'bg-gray-600 border-gray-400 hover:bg-gray-500' 
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                    ${isMicOn 
+                      ? 'bg-red-500 border-red-400 hover:bg-red-600' 
+                      : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
                     }
                   `}
                 >
