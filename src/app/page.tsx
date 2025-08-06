@@ -140,7 +140,7 @@ export default function Home() {
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [countdown, setCountdown] = useState(5);
+  const [countdown, setCountdown] = useState(7);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
@@ -160,7 +160,7 @@ export default function Home() {
     } else if (step === 2 && selectedMajor) {
       setStep(3);
       // 타이머 시작
-      setCountdown(5);
+      setCountdown(7);
       setIsTimerComplete(false);
     } else if (step === 3 && isTimerComplete) {
       setStep(4);
@@ -196,11 +196,8 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          major: selectedMajor,
           messages: [
-            {
-              role: 'system',
-              content: '당신은 전문적인 면접관입니다. 지원자의 답변에 대해 자연스럽고 전문적으로 질문하세요. 답변은 한국어로 해주세요.'
-            },
             ...conversationHistory.map(msg => ({
               role: msg.startsWith('사용자:') ? 'user' : 'assistant',
               content: msg.replace(/^(사용자|면접관): /, '')
@@ -221,82 +218,114 @@ export default function Home() {
       const aiResponse = data.message;
       
       // 면접관 음성 합성
-      speakInterviewerResponse(aiResponse);
+      await speakInterviewerResponse(aiResponse);
     } catch (error) {
       console.error('OpenAI API 오류:', error);
       // 오류 시 기본 응답 사용
       const fallbackResponses = [
-        "흥미로운 답변이네요. 그 부분에 대해 더 자세히 설명해주실 수 있나요?",
-        "좋은 관점입니다. 실제 경험에서 그런 상황을 어떻게 해결하셨나요?",
-        "이해했습니다. 그렇다면 팀워크 측면에서는 어떻게 생각하시나요?"
+        "음... 그렇군요. 그 부분에 대해 조금 더 자세히 들려주실 수 있나요?",
+        "아, 맞네요. 실제로 그런 경험이 있으셨나요?",
+        "그렇다면... 팀워크 측면에서는 어떻게 생각하시나요?",
+        `${selectedMajor} 전공에서 어떤 부분에 가장 관심이 있으신지 궁금해요.`,
+        "그런데요, 현재 사회에서 이 분야가 어떻게 발전하고 있다고 생각하시나요?",
+        "혹시 앞으로 이 전공을 통해 어떤 일을 하고 싶으신지 들려주세요."
       ];
       const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-      speakInterviewerResponse(fallbackResponse);
+      await speakInterviewerResponse(fallbackResponse);
     }
   };
 
   // 면접관 음성 합성
-  const speakInterviewerResponse = (text: string) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ko-KR';
-      utterance.rate = 0.9;
-      utterance.pitch = 1.0;
-      utterance.volume = 0.8;
+  const speakInterviewerResponse = async (text: string) => {
+    try {
+      // 면접관 말하기 시작
+      setIsInterviewerSpeaking(true);
+      setCurrentInterviewerText(text);
+      setIsMicOn(false);
+      if (recognition) {
+        recognition.stop();
+      }
+
+      // OpenAI Voice API 호출
+      const response = await fetch('/api/interview/voice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Voice API 호출 실패');
+      }
+
+      const data = await response.json();
       
-      utterance.onstart = () => {
-        setIsInterviewerSpeaking(true);
-        setCurrentInterviewerText(text);
-        setIsMicOn(false);
-        if (recognition) {
-          recognition.stop();
-        }
-        // 입 움직임 시작
-        setIsInterviewerMouthOpen(true);
-      };
-      
-      utterance.onend = () => {
+      // base64 오디오 데이터를 Audio 객체로 변환
+      const audioBlob = new Blob(
+        [Uint8Array.from(atob(data.audio), c => c.charCodeAt(0))],
+        { type: 'audio/mp3' }
+      );
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+
+      // 오디오 재생 완료 시 정리
+      audio.onended = () => {
         setIsInterviewerSpeaking(false);
         setCurrentInterviewerText("");
         setIsMicOn(true);
         if (recognition) {
           recognition.start();
         }
-        // 입 움직임 종료
-        setIsInterviewerMouthOpen(false);
+        URL.revokeObjectURL(audioUrl);
       };
+
+      // 오디오 재생 시작
+      await audio.play();
+
+    } catch (error) {
+      console.error('Voice API 오류:', error);
       
-      // 음성 진행 중 입 움직임 애니메이션
-      let mouthAnimationInterval: NodeJS.Timeout;
-      
-      utterance.onstart = () => {
-        setIsInterviewerSpeaking(true);
-        setCurrentInterviewerText(text);
-        setIsMicOn(false);
-        if (recognition) {
-          recognition.stop();
+      // 오류 시 기존 브라우저 음성 합성으로 폴백
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ko-KR';
+        
+        // 더 자연스러운 말투를 위한 설정
+        utterance.rate = 0.9; // 자연스러운 속도
+        utterance.pitch = 0.85; // 약간 낮은 톤으로 신뢰감 있게
+        utterance.volume = 0.9; // 적당한 볼륨
+        
+        // 한국어 음성 중 더 자연스러운 음성 선택
+        const voices = speechSynthesis.getVoices();
+        const koreanVoice = voices.find(voice => 
+          voice.lang.includes('ko') && 
+          (voice.name.includes('Google') || voice.name.includes('Samsung') || voice.name.includes('Apple'))
+        );
+        if (koreanVoice) {
+          utterance.voice = koreanVoice;
         }
         
-        // 입 움직임 애니메이션 시작 (0.2초마다 토글)
-        mouthAnimationInterval = setInterval(() => {
-          setIsInterviewerMouthOpen(prev => !prev);
-        }, 200);
-      };
-      
-      utterance.onend = () => {
-        setIsInterviewerSpeaking(false);
-        setCurrentInterviewerText("");
-        setIsMicOn(true);
-        if (recognition) {
-          recognition.start();
-        }
+        utterance.onstart = () => {
+          setIsInterviewerSpeaking(true);
+          setCurrentInterviewerText(text);
+          setIsMicOn(false);
+          if (recognition) {
+            recognition.stop();
+          }
+        };
         
-        // 입 움직임 애니메이션 종료
-        clearInterval(mouthAnimationInterval);
-        setIsInterviewerMouthOpen(false);
-      };
-      
-      speechSynthesis.speak(utterance);
+        utterance.onend = () => {
+          setIsInterviewerSpeaking(false);
+          setCurrentInterviewerText("");
+          setIsMicOn(true);
+          if (recognition) {
+            recognition.start();
+          }
+        };
+        
+        speechSynthesis.speak(utterance);
+      }
     }
   };
 
@@ -484,10 +513,10 @@ export default function Home() {
       startInterview();
       
       // 면접 시작 후 3초 뒤에 첫 질문
-      const firstQuestion = setTimeout(() => {
-        const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
+      const firstQuestion = setTimeout(async () => {
+        const initialQuestion = `안녕하세요! ${selectedUniversity?.name} ${selectedMajor} 면접관입니다. 오늘 면접에 참여해주셔서 감사합니다. 먼저 자기소개를 부탁드릴게요.`;
         setConversationHistory([`면접관: ${initialQuestion}`]);
-        speakInterviewerResponse(initialQuestion);
+        await speakInterviewerResponse(initialQuestion);
       }, 3000);
 
       return () => clearTimeout(firstQuestion);
@@ -518,7 +547,7 @@ export default function Home() {
               setIsDropdownOpen(false);
             } else if (step === 3) {
               setStep(2);
-              setCountdown(5);
+              setCountdown(7);
               setIsTimerComplete(false);
             } else if (step === 4) {
               // 면접 중에는 나가기 확인
@@ -683,11 +712,15 @@ export default function Home() {
           {/* Content */}
           <div className="relative z-10 w-full pt-8 px-6">
             <h1 className="text-[28px] font-bold leading-relaxed text-left">
-              면접관 님이<br />
-              기다리고 있어요
+              <span className="animate-slide-in-1">
+                면접관 님이<br />
+                기다리고 있어요
+              </span>
               <br /><br />
-              마음의 준비가 끝나면<br />
-              문을 열어주세요
+              <span className="animate-slide-in-2">
+                마음의 준비가 끝나면<br />
+                문을 열어주세요
+              </span>
             </h1>
           </div>
 
@@ -713,7 +746,7 @@ export default function Home() {
                     ${isTimerComplete ? 'w-full' : ''}
                   `}
                   style={{
-                    width: isTimerComplete ? '100%' : `${((10 - countdown) / 10) * 100}%`
+                    width: isTimerComplete ? '100%' : `${((7 - countdown) / 7) * 100}%`
                   }}
                 ></div>
                 
@@ -743,20 +776,9 @@ export default function Home() {
                 backgroundRepeat: "no-repeat"
               }}
             >
-              {/* Interviewer Mouth Animation Overlay */}
-              {isInterviewerSpeaking && (
-                <div className="absolute inset-0 z-5 pointer-events-none">
-                  <div 
-                    className="absolute bottom-1/3 left-1/2 transform -translate-x-1/2 w-20 h-10 
-                               bg-black bg-opacity-40 rounded-full animate-mouth"
-                    style={{
-                      transform: 'translateX(-50%)'
-                    }}
-                  ></div>
-                </div>
-              )}
-              {/* Timer Display */}
-              <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
+
+            {/* Timer Display */}
+            <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
                 <div className={`
                   px-3 py-1 rounded text-2xl font-mono font-bold
                   ${interviewTime <= 60 ? 'text-red-500' : 'text-white'}
