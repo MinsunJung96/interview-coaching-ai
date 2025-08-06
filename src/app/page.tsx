@@ -461,12 +461,12 @@ export default function Home() {
                 }
               `}
             >
-              <div className="w-16 h-16 flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
                 <Image
                   src={university.logo}
                   alt={university.name}
-                  width={60}
-                  height={60}
+                  width={90}
+                  height={90}
                   className="object-contain"
                 />
               </div>
