@@ -137,6 +137,10 @@ export default function Home() {
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [userSpeech, setUserSpeech] = useState("");
+  const [interviewerResponse, setInterviewerResponse] = useState("");
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -168,9 +172,107 @@ export default function Home() {
     setIsDropdownOpen(false);
   };
 
+  // 음성 인식 설정
+  const [recognition, setRecognition] = useState<any>(null);
+
+  // 면접관 응답 처리
+  const handleUserResponse = (userInput: string) => {
+    // 대화 기록에 사용자 발화 추가
+    setConversationHistory(prev => [...prev, `사용자: ${userInput}`]);
+    
+    // 면접관 AI 응답 생성 (간단한 규칙 기반)
+    const responses = [
+      "흥미로운 답변이네요. 그 부분에 대해 더 자세히 설명해주실 수 있나요?",
+      "좋은 관점입니다. 실제 경험에서 그런 상황을 어떻게 해결하셨나요?",
+      "이해했습니다. 그렇다면 팀워크 측면에서는 어떻게 생각하시나요?",
+      "매우 구체적인 답변이었습니다. 혹시 어려움이 있었던 부분은 없었나요?",
+      "좋은 답변입니다. 앞으로의 계획은 어떻게 되시나요?"
+    ];
+    
+    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+    setInterviewerResponse(randomResponse);
+    setConversationHistory(prev => [...prev, `면접관: ${randomResponse}`]);
+    
+    // 면접관 음성 합성
+    speakInterviewerResponse(randomResponse);
+  };
+
+  // 면접관 음성 합성
+  const speakInterviewerResponse = (text: string) => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+      utterance.volume = 0.8;
+      
+      utterance.onstart = () => {
+        setIsInterviewerSpeaking(true);
+        setIsMicOn(false);
+        if (recognition) {
+          recognition.stop();
+        }
+      };
+      
+      utterance.onend = () => {
+        setIsInterviewerSpeaking(false);
+        setIsMicOn(true);
+        if (recognition) {
+          recognition.start();
+        }
+      };
+      
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  // 음성 인식 초기화
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'ko-KR';
+      
+      recognition.onresult = (event: any) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i].transcript;
+          }
+        }
+        if (finalTranscript) {
+          setUserSpeech(finalTranscript);
+          handleUserResponse(finalTranscript);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+
+      setRecognition(recognition);
+    }
+  }, []);
+
   const toggleMic = () => {
-    // 면접관이 말하고 있어도 사용자가 수동으로 마이크 제어 가능
-    setIsMicOn(!isMicOn);
+    if (!isMicOn && !isListening) {
+      // 마이크 켜기 - 음성 인식 시작
+      setIsMicOn(true);
+      setIsListening(true);
+      if (recognition) {
+        recognition.start();
+      }
+    } else if (isMicOn && isListening) {
+      // 마이크 끄기 - 음성 인식 중지
+      setIsMicOn(false);
+      setIsListening(false);
+      if (recognition) {
+        recognition.stop();
+      }
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -231,20 +333,16 @@ export default function Home() {
     };
   }, [step, countdown, interviewTime]);
 
-  // 면접관 말하기 시뮬레이션
+  // 면접 시작 시 첫 질문
   useEffect(() => {
     if (step === 4) {
-      // 면접 시작 후 5초 뒤에 첫 질문
+      // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
-        setIsInterviewerSpeaking(true);
-        setIsMicOn(false); // 면접관이 말할 때 마이크 자동 OFF
-        
-        // 10초간 질문한 후 멈춤
-        setTimeout(() => {
-          setIsInterviewerSpeaking(false);
-          setIsMicOn(true); // 질문 끝나면 마이크 자동 ON
-        }, 10000);
-      }, 5000);
+        const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
+        setInterviewerResponse(initialQuestion);
+        setConversationHistory([`면접관: ${initialQuestion}`]);
+        speakInterviewerResponse(initialQuestion);
+      }, 3000);
 
       return () => clearTimeout(firstQuestion);
     }
@@ -506,6 +604,36 @@ export default function Home() {
                   ${interviewTime <= 60 ? 'text-red-500' : 'text-white'}
                 `}>
                   {formatTime(interviewTime)}
+                </div>
+              </div>
+
+              {/* Voice Status */}
+              <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
+                <div className={`
+                  px-4 py-2 rounded-full text-sm font-medium
+                  ${isListening 
+                    ? 'bg-green-500 text-white' 
+                    : isInterviewerSpeaking 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-600 text-gray-300'
+                  }
+                `}>
+                  {isListening ? '🎤 듣는 중...' : isInterviewerSpeaking ? '🗣️ 면접관 말하는 중' : '🔇 대기 중'}
+                </div>
+              </div>
+
+              {/* Conversation Display */}
+              <div className="absolute top-20 left-4 right-4 max-h-40 overflow-y-auto z-10">
+                <div className="bg-black bg-opacity-50 rounded-lg p-3 text-white text-sm">
+                  {conversationHistory.length > 0 ? (
+                    conversationHistory.slice(-4).map((message, index) => (
+                      <div key={index} className="mb-2">
+                        <span className="text-gray-300">{message}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-400">면접이 시작되면 대화가 여기에 표시됩니다.</div>
+                  )}
                 </div>
               </div>
               
