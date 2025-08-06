@@ -497,7 +497,7 @@ export default function Home() {
               }}
             >
               {/* Timer Display */}
-              <div className="absolute bottom-56 left-1/2 transform -translate-x-1/2">
+              <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2">
                 <div className={`
                   px-3 py-1 rounded text-2xl font-mono font-bold
                   ${interviewTime <= 60 ? 'text-red-500' : 'text-white'}
@@ -512,10 +512,12 @@ export default function Home() {
                   onClick={toggleMic}
                   disabled={isInterviewerSpeaking}
                   className={`
-                    w-40 h-40 rounded-full flex items-center justify-center transition-all duration-200
+                    w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4
                     ${isInterviewerSpeaking 
-                      ? 'cursor-not-allowed opacity-50' 
-                      : 'hover:opacity-80'
+                      ? 'bg-gray-600 border-gray-500 cursor-not-allowed' 
+                      : isMicOn 
+                        ? 'bg-gray-600 border-gray-400 hover:bg-gray-500' 
+                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
                     }
                   `}
                 >
@@ -523,16 +525,16 @@ export default function Home() {
                     <Image 
                       src="/mic-on.png" 
                       alt="Microphone On" 
-                      width={80} 
-                      height={80}
+                      width={40} 
+                      height={40}
                       className="object-contain"
                     />
                   ) : (
                     <Image 
                       src="/mic-off.png" 
                       alt="Microphone Off" 
-                      width={80} 
-                      height={80}
+                      width={40} 
+                      height={40}
                       className="object-contain"
                     />
                   )}
