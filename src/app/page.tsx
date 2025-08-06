@@ -524,6 +524,7 @@ export default function Home() {
                       width={40} 
                       height={40}
                       className="object-contain"
+                      priority
                     />
                   ) : (
                     <Image 
@@ -532,6 +533,7 @@ export default function Home() {
                       width={40} 
                       height={40}
                       className="object-contain"
+                      priority
                     />
                   )}
                 </button>
