@@ -147,6 +147,7 @@ export default function Home() {
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const [currentInterviewerText, setCurrentInterviewerText] = useState("");
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -196,9 +197,8 @@ export default function Home() {
     ];
     
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    setConversationHistory(prev => [...prev, `면접관: ${randomResponse}`]);
     
-    // 면접관 음성 합성
+    // 면접관 음성 합성 (대화 기록에는 추가하지 않음)
     speakInterviewerResponse(randomResponse);
   };
 
@@ -213,6 +213,7 @@ export default function Home() {
       
       utterance.onstart = () => {
         setIsInterviewerSpeaking(true);
+        setCurrentInterviewerText(text);
         setIsMicOn(false);
         if (recognition) {
           recognition.stop();
@@ -221,6 +222,7 @@ export default function Home() {
       
       utterance.onend = () => {
         setIsInterviewerSpeaking(false);
+        setCurrentInterviewerText("");
         setIsMicOn(true);
         if (recognition) {
           recognition.start();
@@ -639,7 +641,11 @@ export default function Home() {
               {/* Conversation Display */}
               <div className="absolute top-20 left-4 right-4 max-h-40 overflow-y-auto z-10">
                 <div className="bg-black bg-opacity-50 rounded-lg p-3 text-white text-sm">
-                  {conversationHistory.length > 0 ? (
+                  {isInterviewerSpeaking && currentInterviewerText ? (
+                    <div className="mb-2">
+                      <span className="text-blue-300 font-medium">면접관: {currentInterviewerText}</span>
+                    </div>
+                  ) : conversationHistory.length > 0 ? (
                     conversationHistory.slice(-4).map((message, index) => (
                       <div key={index} className="mb-2">
                         <span className="text-gray-300">{message}</span>
