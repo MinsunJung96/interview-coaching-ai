@@ -377,7 +377,6 @@ export default function Home() {
       // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
         const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
-        setConversationHistory([`면접관: ${initialQuestion}`]);
         speakInterviewerResponse(initialQuestion);
       }, 3000);
 
