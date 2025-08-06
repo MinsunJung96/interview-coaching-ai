@@ -469,7 +469,12 @@ export default function Home() {
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+            <div 
+              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center"
+              style={{
+                backgroundImage: "url('/Interviewer-woman.png')"
+              }}
+            >
               {/* Timer Display */}
               <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
                 <div className={`
