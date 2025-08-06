@@ -235,7 +235,7 @@ export default function Home() {
 
   // 음성 인식 초기화
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+    if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
@@ -250,6 +250,7 @@ export default function Home() {
           }
         }
         if (finalTranscript) {
+          console.log('음성 인식 결과:', finalTranscript);
           handleUserResponse(finalTranscript);
         }
       };
@@ -259,24 +260,48 @@ export default function Home() {
         setIsListening(false);
       };
 
+      recognition.onstart = () => {
+        console.log('음성 인식 시작됨');
+        setIsListening(true);
+      };
+
+      recognition.onend = () => {
+        console.log('음성 인식 종료됨');
+        setIsListening(false);
+      };
+
       setRecognition(recognition);
+    } else {
+      console.error('Speech Recognition API가 지원되지 않습니다.');
     }
   }, []);
 
   const toggleMic = () => {
     if (!isMicOn && !isListening) {
       // 마이크 켜기 - 음성 인식 시작
+      console.log('마이크 켜기 시도');
       setIsMicOn(true);
-      setIsListening(true);
       if (recognition) {
-        recognition.start();
+        try {
+          recognition.start();
+          console.log('음성 인식 시작됨');
+        } catch (error) {
+          console.error('음성 인식 시작 실패:', error);
+        }
+      } else {
+        console.error('음성 인식 객체가 없습니다.');
       }
     } else if (isMicOn && isListening) {
       // 마이크 끄기 - 음성 인식 중지
+      console.log('마이크 끄기 시도');
       setIsMicOn(false);
-      setIsListening(false);
       if (recognition) {
-        recognition.stop();
+        try {
+          recognition.stop();
+          console.log('음성 인식 중지됨');
+        } catch (error) {
+          console.error('음성 인식 중지 실패:', error);
+        }
       }
     }
   };
@@ -339,9 +364,16 @@ export default function Home() {
     };
   }, [step, countdown, interviewTime]);
 
-  // 면접 시작 시 첫 질문
+  // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
     if (step === 4) {
+      // 음성 인식 자동 시작
+      if (recognition) {
+        recognition.start();
+        setIsListening(true);
+        setIsMicOn(true);
+      }
+      
       // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
         const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
@@ -351,7 +383,7 @@ export default function Home() {
 
       return () => clearTimeout(firstQuestion);
     }
-  }, [step]);
+  }, [step, recognition]);
 
   // 클라이언트에서만 렌더링 (Hydration 에러 방지)
   if (!isClient) {
