@@ -610,19 +610,30 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Voice Status */}
+              {/* Voice Expression */}
               <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
-                <div className={`
-                  px-4 py-2 rounded-full text-sm font-medium
-                  ${isListening 
-                    ? 'bg-green-500 text-white' 
-                    : isInterviewerSpeaking 
-                      ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-600 text-gray-300'
-                  }
-                `}>
-                  {isListening ? '🎤 듣는 중...' : isInterviewerSpeaking ? '🗣️ 면접관 말하는 중' : '🔇 대기 중'}
-                </div>
+                {isInterviewerSpeaking ? (
+                  <div className="flex items-end space-x-1 h-8">
+                    {[1, 2, 3, 4].map((bar) => (
+                      <div
+                        key={bar}
+                        className="bg-white rounded-sm animate-voice-bar"
+                        style={{
+                          width: '4px',
+                          animationDelay: `${bar * 0.15}s`
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <Image 
+                    src="/voice-expression.svg" 
+                    alt="Voice Expression" 
+                    width={32} 
+                    height={32}
+                    className="object-contain"
+                  />
+                )}
               </div>
 
               {/* Conversation Display */}
