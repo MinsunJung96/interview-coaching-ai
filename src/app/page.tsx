@@ -465,75 +465,70 @@ export default function Home() {
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
+        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn bg-black">
           {/* Main Interview Video Area */}
-          <div className="flex-1 relative bg-gray-900">
-            {/* Interviewer Video */}
-            <div className="w-full h-full flex items-center justify-center relative">
-              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-32 h-32 bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </div>
-                  <p className="text-gray-400">면접관</p>
-                </div>
-              </div>
-              
+          <div className="flex-1 relative">
+            {/* Interviewer Video Background */}
+            <div 
+              className="w-full h-full bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: "linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 600\"><rect fill=\"%23f5e6d3\" width=\"400\" height=\"600\"/><circle fill=\"%23d4b896\" cx=\"200\" cy=\"180\" r=\"80\"/><rect fill=\"%232d3748\" x=\"120\" y=\"280\" width=\"160\" height=\"200\" rx=\"20\"/><rect fill=\"%23ffffff\" x=\"140\" y=\"320\" width=\"120\" height=\"80\" rx=\"10\"/></svg>')"
+              }}
+            >
               {/* Timer Display */}
-              <div className="absolute top-4 right-4">
+              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2">
                 <div className={`
-                  px-4 py-2 rounded-lg text-lg font-bold
-                  ${interviewTime <= 60 ? 'bg-red-600 text-white' : 'bg-black bg-opacity-70 text-white'}
+                  px-3 py-1 rounded text-2xl font-mono font-bold
+                  ${interviewTime <= 60 ? 'text-red-500' : 'text-white'}
                 `}>
                   {formatTime(interviewTime)}
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Bottom Controls */}
-          <div className="bg-black bg-opacity-80 p-6">
-            <div className="flex justify-center">
+              
               {/* Microphone Button */}
-              <button
-                onClick={toggleMic}
-                disabled={isInterviewerSpeaking}
-                className={`
-                  w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200
-                  ${isInterviewerSpeaking 
-                    ? 'bg-gray-600 cursor-not-allowed' 
-                    : isMicOn 
-                      ? 'bg-white text-black hover:bg-gray-200' 
-                      : 'bg-red-600 text-white hover:bg-red-700'
-                  }
-                `}
-              >
-                {isMicOn ? (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" fill="currentColor"/>
-                    <path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 3l18 18M9.5 9.5a3 3 0 0 0 0 1.5v2a3 3 0 0 0 5.5 1.5M12 2a3 3 0 0 1 3 3v3M19 10v1a7 7 0 0 1-.64 3.08M12 18v4M8 22h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
-              </button>
-            </div>
-            
-            {/* Mic Status Text */}
-            <div className="text-center mt-3">
-              <p className={`text-sm ${isMicOn ? 'text-green-400' : 'text-red-400'}`}>
-                {isInterviewerSpeaking 
-                  ? '면접관이 질문 중입니다' 
-                  : isMicOn 
-                    ? '마이크가 켜져 있습니다' 
-                    : '마이크가 꺼져 있습니다'
-                }
-              </p>
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+                <button
+                  onClick={toggleMic}
+                  disabled={isInterviewerSpeaking}
+                  className={`
+                    w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+                    ${isInterviewerSpeaking 
+                      ? 'bg-gray-600 cursor-not-allowed' 
+                      : isMicOn 
+                        ? 'bg-red-500 hover:bg-red-600' 
+                        : 'bg-gray-700 hover:bg-gray-600'
+                    }
+                  `}
+                >
+                  {isMicOn ? (
+                    <Image 
+                      src="/mic-on.svg" 
+                      alt="Microphone On" 
+                      width={28} 
+                      height={28}
+                      className="filter invert"
+                    />
+                  ) : (
+                    <Image 
+                      src="/mic-off.svg" 
+                      alt="Microphone Off" 
+                      width={28} 
+                      height={28}
+                      className="filter invert"
+                    />
+                  )}
+                </button>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-700">
+                <div 
+                  className="h-full bg-white transition-all duration-1000 ease-linear"
+                  style={{
+                    width: `${((600 - interviewTime) / 600) * 100}%`
+                  }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>
