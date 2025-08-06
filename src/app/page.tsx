@@ -470,12 +470,17 @@ export default function Home() {
           <div className="flex-1 relative bg-gray-900">
             {/* Interviewer Video */}
             <div className="w-full h-full flex items-center justify-center relative">
-              <div 
-                className="w-full h-full bg-cover bg-center bg-no-repeat"
-                style={{
-                  backgroundImage: "url('/interviewer_woman.png')"
-                }}
-              ></div>
+              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-32 h-32 bg-gray-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                  <p className="text-gray-400">면접관</p>
+                </div>
+              </div>
               
               {/* Timer Display */}
               <div className="absolute top-4 right-4">
