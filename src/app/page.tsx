@@ -120,7 +120,7 @@ export default function Home() {
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(5);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
@@ -136,7 +136,7 @@ export default function Home() {
     } else if (step === 2 && selectedMajor) {
       setStep(3);
       // 타이머 시작
-      setCountdown(10);
+      setCountdown(5);
       setIsTimerComplete(false);
     } else if (step === 3 && isTimerComplete) {
       setStep(4);
@@ -254,7 +254,7 @@ export default function Home() {
               setIsDropdownOpen(false);
             } else if (step === 3) {
               setStep(2);
-              setCountdown(10);
+              setCountdown(5);
               setIsTimerComplete(false);
             } else if (step === 4) {
               // 면접 중에는 나가기 확인
