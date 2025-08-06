@@ -290,6 +290,17 @@ export default function Home() {
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        
+        // 권한 관련 에러 처리
+        if (event.error === 'not-allowed') {
+          alert('마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+        } else if (event.error === 'no-speech') {
+          console.log('음성이 감지되지 않았습니다.');
+        } else if (event.error === 'audio-capture') {
+          alert('마이크를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해주세요.');
+        } else if (event.error === 'network') {
+          console.error('네트워크 오류가 발생했습니다.');
+        }
       };
 
       recognition.onstart = () => {
@@ -308,10 +319,31 @@ export default function Home() {
     }
   }, []);
 
-  const toggleMic = () => {
+  // 마이크 권한 요청
+  const requestMicrophonePermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('마이크 권한 허용됨');
+      stream.getTracks().forEach(track => track.stop()); // 스트림 정리
+      return true;
+    } catch (error) {
+      console.error('마이크 권한 거부됨:', error);
+      alert('마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+      return false;
+    }
+  };
+
+  const toggleMic = async () => {
     if (!isMicOn && !isListening) {
       // 마이크 켜기 - 음성 인식 시작
       console.log('마이크 켜기 시도');
+      
+      // 마이크 권한 확인
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) {
+        return;
+      }
+      
       setIsMicOn(true);
       if (recognition) {
         try {
@@ -399,12 +431,22 @@ export default function Home() {
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
     if (step === 4) {
-      // 음성 인식 자동 시작
-      if (recognition) {
-        recognition.start();
-        setIsListening(true);
-        setIsMicOn(true);
-      }
+      // 마이크 권한 확인 후 음성 인식 자동 시작
+      const startInterview = async () => {
+        const hasPermission = await requestMicrophonePermission();
+        if (hasPermission && recognition) {
+          try {
+            recognition.start();
+            setIsListening(true);
+            setIsMicOn(true);
+            console.log('면접 화면에서 음성 인식 시작됨');
+          } catch (error) {
+            console.error('면접 화면에서 음성 인식 시작 실패:', error);
+          }
+        }
+      };
+      
+      startInterview();
       
       // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
