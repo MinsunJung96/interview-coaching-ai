@@ -491,12 +491,12 @@ export default function Home() {
                   onClick={toggleMic}
                   disabled={isInterviewerSpeaking}
                   className={`
-                    w-16 h-16 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg
+                    w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4
                     ${isInterviewerSpeaking 
-                      ? 'bg-gray-600 cursor-not-allowed' 
+                      ? 'bg-gray-600 border-gray-500 cursor-not-allowed' 
                       : isMicOn 
-                        ? 'bg-red-500 hover:bg-red-600' 
-                        : 'bg-gray-700 hover:bg-gray-600'
+                        ? 'bg-gray-600 border-gray-400 hover:bg-gray-500' 
+                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
                     }
                   `}
                 >
@@ -504,17 +504,17 @@ export default function Home() {
                     <Image 
                       src="/mic-on.png" 
                       alt="Microphone On" 
-                      width={28} 
-                      height={28}
-                      className="filter invert"
+                      width={40} 
+                      height={40}
+                      className="object-contain"
                     />
                   ) : (
                     <Image 
                       src="/mic-off.png" 
                       alt="Microphone Off" 
-                      width={28} 
-                      height={28}
-                      className="filter invert"
+                      width={40} 
+                      height={40}
+                      className="object-contain"
                     />
                   )}
                 </button>
