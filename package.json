@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:safe": "./start-server.sh",
+    "dev:clean": "(pkill -9 -f next || true) && (pkill -9 -f npm || true) && sleep 2 && npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
