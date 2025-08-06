@@ -116,7 +116,7 @@ export default function Home() {
   const [countdown, setCountdown] = useState(10);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
 
-  const handleUniversitySelect = (university) => {
+  const handleUniversitySelect = (university: any) => {
     setSelectedUniversity(university);
   };
 
