@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
+// TypeScript 타입 정의
+declare global {
+  interface Window {
+    webkitSpeechRecognition: any;
+    SpeechRecognition: any;
+  }
+}
+
 // Hydration 에러 방지
 function useClientOnly() {
   const [isClient, setIsClient] = useState(false);
@@ -138,8 +146,6 @@ export default function Home() {
   const [isMicOn, setIsMicOn] = useState(true);
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [userSpeech, setUserSpeech] = useState("");
-  const [interviewerResponse, setInterviewerResponse] = useState("");
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
 
   const handleUniversitySelect = (university: University) => {
@@ -190,7 +196,6 @@ export default function Home() {
     ];
     
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-    setInterviewerResponse(randomResponse);
     setConversationHistory(prev => [...prev, `면접관: ${randomResponse}`]);
     
     // 면접관 음성 합성
@@ -243,7 +248,6 @@ export default function Home() {
           }
         }
         if (finalTranscript) {
-          setUserSpeech(finalTranscript);
           handleUserResponse(finalTranscript);
         }
       };
@@ -339,7 +343,6 @@ export default function Home() {
       // 면접 시작 후 3초 뒤에 첫 질문
       const firstQuestion = setTimeout(() => {
         const initialQuestion = "안녕하세요! 면접을 시작하겠습니다. 자기소개를 해주세요.";
-        setInterviewerResponse(initialQuestion);
         setConversationHistory([`면접관: ${initialQuestion}`]);
         speakInterviewerResponse(initialQuestion);
       }, 3000);
