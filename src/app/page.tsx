@@ -150,6 +150,9 @@ export default function Home() {
   const [currentInterviewerText, setCurrentInterviewerText] = useState("");
   const [isInterviewerMouthOpen, setIsInterviewerMouthOpen] = useState(false);
   const [currentInterviewerVideo, setCurrentInterviewerVideo] = useState('interviewer-listening');
+  const [lastVoiceAPICall, setLastVoiceAPICall] = useState(0);
+  const [useVoiceAPI, setUseVoiceAPI] = useState(true);
+  const [isProcessingResponse, setIsProcessingResponse] = useState(false);
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -186,10 +189,46 @@ export default function Home() {
 
   // 면접관 응답 처리
   const handleUserResponse = async (userInput: string) => {
-    // 대화 기록에 사용자 발화 추가
-    setConversationHistory(prev => [...prev, `사용자: ${userInput}`]);
+    // 이미 처리 중이면 무시
+    if (isProcessingResponse) {
+      console.log('이미 응답 처리 중, 무시됨');
+      return;
+    }
+    
+    // 빈 입력이거나 너무 짧으면 알림 표시
+    if (!userInput || userInput.trim().length < 2) {
+      console.log('입력이 너무 짧음, 무시됨');
+      
+      // 알림 메시지 표시
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+      alertDiv.textContent = '응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.';
+      document.body.appendChild(alertDiv);
+      
+      // 3초 후 제거
+      setTimeout(() => {
+        alertDiv.remove();
+      }, 3000);
+      
+      if (recognition) {
+        setTimeout(() => {
+          recognition.start(); // 잘시 후 다시 시작
+        }, 500);
+      }
+      return;
+    }
+    
+    setIsProcessingResponse(true);
+    
+    // 새로운 대화 기록 생성 (setState의 비동기 문제 해결)
+    const newConversationHistory = [...conversationHistory, `사용자: ${userInput}`];
+    setConversationHistory(newConversationHistory);
     
     try {
+      console.log('OpenAI API 호출 시작');
+      console.log('대화 기록:', newConversationHistory);
+      console.log('사용자 입력:', userInput);
+      
       // OpenAI API 호출
       const response = await fetch('/api/interview', {
         method: 'POST',
@@ -200,24 +239,26 @@ export default function Home() {
           major: selectedMajor,
           university: selectedUniversity?.name,
           messages: [
-            ...conversationHistory.map(msg => ({
+            ...newConversationHistory.map(msg => ({
               role: msg.startsWith('사용자:') ? 'user' : 'assistant',
-              content: msg.startsWith('사용자:') ? msg.substring(4) : msg.startsWith('면접관:') ? msg.substring(4) : msg
-            })),
-            {
-              role: 'user',
-              content: userInput
-            }
+              content: msg.replace(/^(사용자|면접관):\s*/, '') // 정규식으로 정확히 제거
+            }))
           ]
         })
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API 응답 에러:', response.status, errorText);
         throw new Error('API 호출 실패');
       }
 
       const data = await response.json();
       const aiResponse = data.message;
+      console.log('AI 응답:', aiResponse);
+      
+      // 대화 기록에 AI 응답 추가
+      setConversationHistory(prev => [...prev, `면접관: ${aiResponse}`]);
       
       // 면접관 음성 합성
       await speakInterviewerResponse(aiResponse);
@@ -236,6 +277,9 @@ export default function Home() {
       ];
       const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
       await speakInterviewerResponse(fallbackResponse);
+    } finally {
+      // 처리 완료 후 플래그 해제
+      setIsProcessingResponse(false);
     }
   };
 
@@ -253,6 +297,12 @@ export default function Home() {
 
   // 면접관 음성 합성
   const speakInterviewerResponse = async (text: string) => {
+    // 이미 말하고 있으면 중복 방지
+    if (isInterviewerSpeaking) {
+      console.log('이미 면접관이 말하고 있음, 중복 방지');
+      return;
+    }
+    
     try {
       // 면접관 말하기 시작
       setIsInterviewerSpeaking(true);
@@ -273,7 +323,9 @@ export default function Home() {
       });
 
       if (!response.ok) {
-        throw new Error('Voice API 호출 실패');
+        const errorText = await response.text();
+        console.error('Voice API 응답:', response.status, errorText);
+        throw new Error(`Voice API 호출 실패: ${response.status}`);
       }
 
       const data = await response.json();
@@ -292,8 +344,11 @@ export default function Home() {
         setCurrentInterviewerText("");
         setIsMicOn(true);
         updateInterviewerVideo(false); // 면접관 말하기 끝
-        if (recognition) {
-          recognition.start();
+        setIsProcessingResponse(false); // 처리 완료
+        if (recognition && !isProcessingResponse) {
+          setTimeout(() => {
+            recognition.start();
+          }, 500); // 약간의 딜레이 후 시작
         }
         URL.revokeObjectURL(audioUrl);
       };
@@ -339,8 +394,11 @@ export default function Home() {
           setCurrentInterviewerText("");
           setIsMicOn(true);
           updateInterviewerVideo(false); // 면접관 말하기 끝
-          if (recognition) {
-            recognition.start();
+          setIsProcessingResponse(false); // 처리 완료
+          if (recognition && !isProcessingResponse) {
+            setTimeout(() => {
+              recognition.start();
+            }, 500); // 약간의 딜레이 후 시작
           }
         };
         
@@ -358,6 +416,7 @@ export default function Home() {
       recognition.interimResults = true;
       recognition.lang = 'ko-KR';
       
+      let isProcessing = false; // 로컬 플래그
       recognition.onresult = (event: any) => {
         let finalTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -365,10 +424,29 @@ export default function Home() {
             finalTranscript += event.results[i].transcript;
           }
         }
-        if (finalTranscript) {
+        if (finalTranscript && !isProcessing) {
           console.log('음성 인식 결과:', finalTranscript);
+          isProcessing = true;
           updateInterviewerVideo(false); // 사용자가 말할 때
-          handleUserResponse(finalTranscript);
+          // 음성 인식 임시 중지
+          recognition.stop();
+          handleUserResponse(finalTranscript).finally(() => {
+            isProcessing = false;
+          });
+        } else if (!finalTranscript && event.results[event.results.length - 1].isFinal) {
+          // 빈 결과가 final로 오면 알림
+          console.log('빈 음성 입력 감지');
+          
+          // 알림 메시지 표시
+          const alertDiv = document.createElement('div');
+          alertDiv.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-yellow-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fadeIn';
+          alertDiv.textContent = '음성이 잘 인식되지 않았습니다. 다시 말씀해주세요.';
+          document.body.appendChild(alertDiv);
+          
+          // 3초 후 제거
+          setTimeout(() => {
+            alertDiv.remove();
+          }, 3000);
         }
       };
 
@@ -525,9 +603,12 @@ export default function Home() {
     };
   }, [step, countdown, interviewTime, recognition]);
 
+  // 첫 질문 여부를 추적하는 state 추가
+  const [hasAskedFirstQuestion, setHasAskedFirstQuestion] = useState(false);
+  
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
-    if (step === 4) {
+    if (step === 4 && !hasAskedFirstQuestion) {
       // 마이크 권한 확인 후 음성 인식 자동 시작
       const startInterview = async () => {
         const hasPermission = await requestMicrophonePermission();
@@ -545,16 +626,23 @@ export default function Home() {
       
       startInterview();
       
-      // 면접 시작 후 3초 뒤에 첫 질문
+      // 면접 시작 후 3초 뒤에 첫 질문 (한 번만 실행)
       const firstQuestion = setTimeout(async () => {
-        const initialQuestion = `안녕하세요! ${selectedUniversity?.name} ${selectedMajor} 면접관입니다. 오늘 면접에 참여해주셔서 감사합니다. 먼저 자기소개를 부탁드릴게요.`;
-        setConversationHistory([`면접관: ${initialQuestion}`]);
-        await speakInterviewerResponse(initialQuestion);
+        if (!hasAskedFirstQuestion && !isInterviewerSpeaking) {
+          setHasAskedFirstQuestion(true);
+          const initialQuestion = `안녕하세요! ${selectedUniversity?.name} ${selectedMajor} 면접에 오신 것을 환영합니다. 먼저 1분 정도로 간단히 자기소개를 부탁드릴게요.`;
+          // 대화 기록에 첫 질문 추가
+          setConversationHistory([`면접관: ${initialQuestion}`]);
+          // 음성으로 질문하기
+          await speakInterviewerResponse(initialQuestion);
+        }
       }, 3000);
 
-      return () => clearTimeout(firstQuestion);
+      return () => {
+        clearTimeout(firstQuestion);
+      };
     }
-  }, [step, recognition]);
+  }, [step, hasAskedFirstQuestion]); // hasAskedFirstQuestion 의존성 추가
 
   // 클라이언트에서만 렌더링 (Hydration 에러 방지)
   if (!isClient) {
@@ -589,6 +677,7 @@ export default function Home() {
                 setInterviewTime(600);
                 setIsMicOn(true);
                 setIsInterviewerSpeaking(false);
+                setHasAskedFirstQuestion(false); // 첫 질문 플래그 초기화
               }
             } else if (step === 5) {
               // 완료 화면에서 메인으로 돌아가기
@@ -598,6 +687,7 @@ export default function Home() {
                 setSelectedMajor("");
                 setConversationHistory([]);
                 setInterviewTime(600);
+                setHasAskedFirstQuestion(false); // 첫 질문 플래그 초기화
               }
             }
           }}
@@ -828,17 +918,20 @@ export default function Home() {
         <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
-            {/* Interviewer WebM Background */}
+            {/* Interviewer Video Background */}
             <div className="w-full h-full flex items-center justify-center relative z-0">
               <video
+                key={currentInterviewerVideo}
                 autoPlay
                 loop
                 muted
                 playsInline
                 className="w-full h-full object-cover"
                 style={{ minHeight: "100vh" }}
+                onError={(e) => console.error('비디오 로드 에러:', e)}
+                onLoadedData={() => console.log('비디오 로드됨:', currentInterviewerVideo)}
               >
-                <source src={`/${currentInterviewerVideo}.webm`} type="video/webm" />
+                <source src={`/${currentInterviewerVideo}.mp4`} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -926,7 +1019,6 @@ export default function Home() {
                   }}
                 ></div>
               </div>
-            </div> 
           </div>
         </div>
       )}
@@ -937,11 +1029,13 @@ export default function Home() {
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {console.log('면접 완료 화면 - 대화 기록:', conversationHistory)}
             {conversationHistory.length > 0 ? (
               conversationHistory.map((message, index) => {
                 const isInterviewer = message.startsWith('면접관:');
                 const isUser = message.startsWith('사용자:');
-                const messageText = message.startsWith('면접관:') ? message.substring(4) : message.startsWith('사용자:') ? message.substring(4) : message;
+                // "면접관: " 또는 "사용자: " 제거 (공백 포함)
+                const messageText = message.replace(/^(면접관|사용자):\s*/, '');
                 const timestamp = `${Math.floor(index / 2)}:${(index % 2 * 30).toString().padStart(2, '0')}`;
                 
                 return (
