@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "dev:safe": "./start-server.sh",
     "dev:clean": "(pkill -9 -f next || true) && (pkill -9 -f npm || true) && sleep 2 && npm run dev",
     "build": "next build",

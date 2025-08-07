@@ -149,6 +149,7 @@ export default function Home() {
   const [conversationHistory, setConversationHistory] = useState<string[]>([]);
   const [currentInterviewerText, setCurrentInterviewerText] = useState("");
   const [isInterviewerMouthOpen, setIsInterviewerMouthOpen] = useState(false);
+  const [currentInterviewerVideo, setCurrentInterviewerVideo] = useState('interviewer-listening');
 
   const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
@@ -201,7 +202,7 @@ export default function Home() {
           messages: [
             ...conversationHistory.map(msg => ({
               role: msg.startsWith('사용자:') ? 'user' : 'assistant',
-              content: msg.replace(/^(사용자|면접관): /, '')
+              content: msg.startsWith('사용자:') ? msg.substring(4) : msg.startsWith('면접관:') ? msg.substring(4) : msg
             })),
             {
               role: 'user',
@@ -238,6 +239,18 @@ export default function Home() {
     }
   };
 
+  // 면접관 영상 상태 관리
+  const updateInterviewerVideo = (isSpeaking: boolean) => {
+    if (isSpeaking) {
+      setCurrentInterviewerVideo('interviewer-speaking');
+    } else {
+      // 사용자가 말할 때는 listening과 writing을 랜덤하게 선택
+      const videos = ['interviewer-listening', 'interviewer-writing'];
+      const randomVideo = videos[Math.floor(Math.random() * videos.length)];
+      setCurrentInterviewerVideo(randomVideo);
+    }
+  };
+
   // 면접관 음성 합성
   const speakInterviewerResponse = async (text: string) => {
     try {
@@ -245,6 +258,7 @@ export default function Home() {
       setIsInterviewerSpeaking(true);
       setCurrentInterviewerText(text);
       setIsMicOn(false);
+      updateInterviewerVideo(true); // 면접관이 말할 때
       if (recognition) {
         recognition.stop();
       }
@@ -277,6 +291,7 @@ export default function Home() {
         setIsInterviewerSpeaking(false);
         setCurrentInterviewerText("");
         setIsMicOn(true);
+        updateInterviewerVideo(false); // 면접관 말하기 끝
         if (recognition) {
           recognition.start();
         }
@@ -313,6 +328,7 @@ export default function Home() {
           setIsInterviewerSpeaking(true);
           setCurrentInterviewerText(text);
           setIsMicOn(false);
+          updateInterviewerVideo(true); // 면접관이 말할 때
           if (recognition) {
             recognition.stop();
           }
@@ -322,6 +338,7 @@ export default function Home() {
           setIsInterviewerSpeaking(false);
           setCurrentInterviewerText("");
           setIsMicOn(true);
+          updateInterviewerVideo(false); // 면접관 말하기 끝
           if (recognition) {
             recognition.start();
           }
@@ -350,6 +367,7 @@ export default function Home() {
         }
         if (finalTranscript) {
           console.log('음성 인식 결과:', finalTranscript);
+          updateInterviewerVideo(false); // 사용자가 말할 때
           handleUserResponse(finalTranscript);
         }
       };
@@ -486,14 +504,26 @@ export default function Home() {
     // 면접 10분 타이머
     if (step === 4 && interviewTime > 0) {
       timer = setInterval(() => {
-        setInterviewTime((prev) => prev - 1);
+        setInterviewTime((prev) => {
+          if (prev <= 1) {
+            // 면접 시간 종료 시 완료 화면으로 이동
+            setStep(5);
+            if (recognition) {
+              recognition.stop();
+            }
+            setIsMicOn(false);
+            setIsInterviewerSpeaking(false);
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
 
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [step, countdown, interviewTime]);
+  }, [step, countdown, interviewTime, recognition]);
 
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
@@ -539,7 +569,7 @@ export default function Home() {
     <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
-      <div className="flex items-center p-4">
+      <div className="flex items-center justify-between p-4">
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
           onClick={() => {
@@ -560,6 +590,15 @@ export default function Home() {
                 setIsMicOn(true);
                 setIsInterviewerSpeaking(false);
               }
+            } else if (step === 5) {
+              // 완료 화면에서 메인으로 돌아가기
+              if (confirm("메인 화면으로 돌아가시겠습니까?")) {
+                setStep(1);
+                setSelectedUniversity(null);
+                setSelectedMajor("");
+                setConversationHistory([]);
+                setInterviewTime(600);
+              }
             }
           }}
         >
@@ -573,6 +612,27 @@ export default function Home() {
             </svg>
           )}
         </button>
+        
+        {/* Complete Button - 면접 화면에서만 표시 */}
+        {step === 4 && (
+          <button
+            onClick={() => {
+              if (confirm("면접을 완료하시겠습니까?")) {
+                setStep(5);
+                if (recognition) {
+                  recognition.stop();
+                }
+                setIsMicOn(false);
+                setIsInterviewerSpeaking(false);
+              }
+            }}
+            className="text-white hover:text-gray-300 transition-colors font-medium"
+          >
+            면접실 나가기
+          </button>
+        )}
+        
+
       </div>
 
       {/* Step 1: University Selection */}
@@ -768,17 +828,20 @@ export default function Home() {
         <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
-            {/* Interviewer Video Background */}
-            <div 
-              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center relative z-0"
-              style={{
-                backgroundImage: "url('/Interviewer-woman.png')",
-                minHeight: "100vh",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat"
-              }}
-            >
+            {/* Interviewer WebM Background */}
+            <div className="w-full h-full flex items-center justify-center relative z-0">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                style={{ minHeight: "100vh" }}
+              >
+                <source src={`/${currentInterviewerVideo}.webm`} type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
 
             {/* Timer Display */}
             <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
@@ -789,6 +852,8 @@ export default function Home() {
                   {formatTime(interviewTime)}
                 </div>
               </div>
+
+
 
               {/* Voice Expression */}
               <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
@@ -839,13 +904,7 @@ export default function Home() {
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
                 <button
                   onClick={toggleMic}
-                  className={`
-                    w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4
-                    ${isMicOn 
-                      ? 'bg-red-500 border-red-400 hover:bg-red-600' 
-                      : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
-                    }
-                  `}
+                  className={`w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4 ${isMicOn ? 'bg-red-500 border-red-400 hover:bg-red-600' : 'bg-gray-700 border-gray-600 hover:bg-gray-600'}`}
                 >
                   <Image 
                     src={isMicOn ? "/mic-on.svg" : "/mic-off.svg"} 
@@ -867,7 +926,71 @@ export default function Home() {
                   }}
                 ></div>
               </div>
-            </div>
+            </div> 
+          </div>
+        </div>
+      )}
+
+      {/* Step 5: Interview Completion */}
+      {step === 5 && (
+        <div className="flex-1 flex flex-col bg-black text-white transition-all duration-500 ease-in-out animate-slide-up">
+
+          {/* Chat History */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {conversationHistory.length > 0 ? (
+              conversationHistory.map((message, index) => {
+                const isInterviewer = message.startsWith('면접관:');
+                const isUser = message.startsWith('사용자:');
+                const messageText = message.startsWith('면접관:') ? message.substring(4) : message.startsWith('사용자:') ? message.substring(4) : message;
+                const timestamp = `${Math.floor(index / 2)}:${(index % 2 * 30).toString().padStart(2, '0')}`;
+                
+                return (
+                  <div 
+                    key={index} 
+                    className={`flex ${isInterviewer ? 'justify-start' : 'justify-end'} ${isInterviewer ? 'animate-slide-in-left' : 'animate-slide-in-right'}`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className={`max-w-[80%] ${isInterviewer ? 'order-1' : 'order-2'}`}>
+                      <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${isInterviewer ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'}`}>
+                        {messageText}
+                      </div>
+                    </div>
+                    <div className={`flex items-end mx-2 ${isInterviewer ? 'order-2' : 'order-1'}`}>
+                      <span className="text-xs text-gray-400">{timestamp}</span>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center text-gray-400">
+                  <div className="text-lg mb-2">면접 기록이 없습니다</div>
+                  <div className="text-sm">면접을 다시 시작해보세요</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="p-4 space-y-3 border-t border-gray-800">
+            <button
+              onClick={() => {
+                // 분석 리포트 받기 기능 (향후 구현)
+                alert('분석 리포트 기능은 준비 중입니다.');
+              }}
+              className="w-full bg-gray-400 hover:bg-gray-500 text-white py-3 px-4 rounded-lg font-medium transition-colors active:scale-95"
+            >
+              분석 리포트 받기
+            </button>
+            <button
+              onClick={() => {
+                // 녹음본 다운로드 기능 (향후 구현)
+                alert('녹음본 다운로드 기능은 준비 중입니다.');
+              }}
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-medium transition-colors active:scale-95"
+            >
+              녹음본 다운로드
+            </button>
           </div>
         </div>
       )}
