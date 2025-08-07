@@ -1992,20 +1992,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {(() => {
-              console.log('[Step 5 렌더링]');
-              console.log('- 대화 기록 개수:', conversationHistory.length);
-              console.log('- 대화 기록 내용:', JSON.stringify(conversationHistory, null, 2));
-              console.log('- 첫 번째 메시지:', conversationHistory[0]);
-              console.log('- 마지막 메시지:', conversationHistory[conversationHistory.length - 1]);
-              return null;
-            })()}
+
             {conversationHistory.length > 0 ? (
               conversationHistory.map((message, index) => {
                 const isInterviewer = message.startsWith('면접관:');
                 const isUser = message.startsWith('사용자:');
                 // "면접관: " 또는 "사용자: " 제거 (공백 포함)
-                const messageText = message.replace(/^(면접관|사용자):\s*/, '');
+                const messageText = message.startsWith('면접관:') ? message.substring(4) : message.startsWith('사용자:') ? message.substring(4) : message;
                 const timestamp = `${Math.floor(index / 2)}:${(index % 2 * 30).toString().padStart(2, '0')}`;
                 
                 return (
