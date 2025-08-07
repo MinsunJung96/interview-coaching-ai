@@ -1029,13 +1029,12 @@ export default function Home() {
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {console.log('면접 완료 화면 - 대화 기록:', conversationHistory)}
             {conversationHistory.length > 0 ? (
               conversationHistory.map((message, index) => {
                 const isInterviewer = message.startsWith('면접관:');
                 const isUser = message.startsWith('사용자:');
                 // "면접관: " 또는 "사용자: " 제거 (공백 포함)
-                const messageText = message.replace(/^(면접관|사용자):\s*/, '');
+                const messageText = message.startsWith('면접관:') ? message.substring(4) : message.startsWith('사용자:') ? message.substring(4) : message;
                 const timestamp = `${Math.floor(index / 2)}:${(index % 2 * 30).toString().padStart(2, '0')}`;
                 
                 return (
