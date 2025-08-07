@@ -197,7 +197,6 @@ export default function Home() {
         },
         body: JSON.stringify({
           major: selectedMajor,
-          university: selectedUniversity?.name,
           messages: [
             ...conversationHistory.map(msg => ({
               role: msg.startsWith('사용자:') ? 'user' : 'assistant',
@@ -228,10 +227,8 @@ export default function Home() {
         "아, 맞네요. 실제로 그런 경험이 있으셨나요?",
         "그렇다면... 팀워크 측면에서는 어떻게 생각하시나요?",
         `${selectedMajor} 전공에서 어떤 부분에 가장 관심이 있으신지 궁금해요.`,
-        `${selectedUniversity?.name}를 선택하신 특별한 이유가 있으신가요?`,
         "그런데요, 현재 사회에서 이 분야가 어떻게 발전하고 있다고 생각하시나요?",
-        "혹시 앞으로 이 전공을 통해 어떤 일을 하고 싶으신지 들려주세요.",
-        `${selectedUniversity?.name} ${selectedMajor}의 특성과 장점에 대해 어떻게 생각하시나요?`
+        "혹시 앞으로 이 전공을 통해 어떤 일을 하고 싶으신지 들려주세요."
       ];
       const fallbackResponse = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
       await speakInterviewerResponse(fallbackResponse);
@@ -769,16 +766,26 @@ export default function Home() {
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
-            <div 
-              className="w-full h-full bg-cover bg-center bg-no-repeat flex items-center justify-center relative z-0"
-              style={{
-                backgroundImage: "url('/Interviewer-woman.png')",
-                minHeight: "100vh",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat"
-              }}
-            >
+            <div className="w-full h-full flex items-center justify-center relative z-0 overflow-hidden">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{
+                  minHeight: "100vh"
+                }}
+              >
+                <source src="/interviewer_listening.mp4" type="video/mp4" />
+                {/* Fallback to image if video fails */}
+                <img 
+                  src="/Interviewer-woman.png" 
+                  alt="Interviewer" 
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </video>
+            </div>
 
             {/* Timer Display */}
             <div className="absolute bottom-34 left-1/2 transform -translate-x-1/2 z-10">
