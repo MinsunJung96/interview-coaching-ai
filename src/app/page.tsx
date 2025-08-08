@@ -2166,40 +2166,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     </div>
                   )}
                   
-                  {/* 음성 레벨 표시 원 (마이크 ON 상태일 때만) */}
+                  {/* 음성 레벨 표시 그라데이션 오버레이 (마이크 ON 상태일 때만) */}
                   {isMicOn && !isInterviewerSpeaking && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      {/* 외부 원 - 최대 150px 제한 */}
-                      <div 
-                        className="absolute rounded-full bg-blue-500 transition-all duration-200 ease-out animate-pulse"
-                        style={{
-                          width: `${Math.min(150, Math.max(120, 120 + (audioLevel * 2)))}px`,
-                          height: `${Math.min(150, Math.max(120, 120 + (audioLevel * 2)))}px`,
-                          opacity: Math.min(0.15 + (audioLevel / 255) * 0.3, 0.45),
-                          transform: `scale(${Math.min(1.25, 1 + (audioLevel / 255) * 0.25)})`,
-                        }}
-                      />
-                      {/* 중간 원 - 최대 140px 제한 */}
-                      <div 
-                        className="absolute rounded-full bg-blue-500 transition-all duration-150 ease-out"
-                        style={{
-                          width: `${Math.min(140, Math.max(100, 100 + (audioLevel * 1.5)))}px`,
-                          height: `${Math.min(140, Math.max(100, 100 + (audioLevel * 1.5)))}px`,
-                          opacity: Math.min(0.2 + (audioLevel / 255) * 0.35, 0.55),
-                          transform: `scale(${Math.min(1.2, 1 + (audioLevel / 255) * 0.2)})`,
-                        }}
-                      />
-                      {/* 내부 원 - 최대 130px 제한 */}
-                      <div 
-                        className="absolute rounded-full bg-blue-500 transition-all duration-100 ease-out"
-                        style={{
-                          width: `${Math.min(130, Math.max(90, 90 + (audioLevel * 1)))}px`,
-                          height: `${Math.min(130, Math.max(90, 90 + (audioLevel * 1)))}px`,
-                          opacity: Math.min(0.25 + (audioLevel / 255) * 0.3, 0.55),
-                          transform: `scale(${Math.min(1.15, 1 + (audioLevel / 255) * 0.15)})`,
-                        }}
-                      />
-                    </div>
+                    <div 
+                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 transition-all duration-150 ease-out"
+                      style={{
+                        width: '80px',
+                        height: `${Math.max(0, (audioLevel / 255) * 100)}px`,
+                        background: 'linear-gradient(to top, #FF5500 50%, transparent 100%)',
+                        borderRadius: '40px 40px 0 0',
+                      }}
+                    />
                   )}
                   
                   {/* 마이크 버튼 - 크기 확대 */}
