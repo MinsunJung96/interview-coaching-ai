@@ -135,8 +135,20 @@ interface University {
 
 export default function Home() {
   const isClient = useClientOnly();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
+  
+  // Animation states for Step 0
+  const [countNumber, setCountNumber] = useState(0);
+  const [activeListItems, setActiveListItems] = useState<number[]>([]);
+  const [digitAnimations, setDigitAnimations] = useState({
+    thousands: 0,
+    hundreds: 0,
+    tens: 0,
+    ones: 0
+  });
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -146,7 +158,7 @@ export default function Home() {
   const [isMicOn, setIsMicOn] = useState(true);
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [isListening, setIsListening] = useState(false);
-  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<{message: string, timestamp: number}[]>([]);
   const [userResponseSummary, setUserResponseSummary] = useState<string[]>([]); // 사용자 응답 요약 누적
   const [currentInterviewerText, setCurrentInterviewerText] = useState("");
   const [isInterviewerMouthOpen, setIsInterviewerMouthOpen] = useState(false);
@@ -229,17 +241,124 @@ export default function Home() {
     setSelectedUniversity(university);
   };
 
+  // Smooth step transition function
+  const changeStepWithTransition = (newStep: number, direction: 'forward' | 'backward' = 'forward') => {
+    setIsTransitioning(true);
+    setTransitionDirection(direction);
+    
+    setTimeout(() => {
+      setStep(newStep);
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 50);
+    }, 300);
+  };
+
+  // Function to calculate digit value with overshoot effect
+  const getDigitValue = (elapsed: number, duration: number, target: number) => {
+    if (elapsed >= duration + 200) {
+      return target; // Final value after overshoot
+    }
+    
+    if (elapsed < duration) {
+      // Normal animation phase with easing
+      const progress = elapsed / duration;
+      const easedProgress = 1 - Math.pow(1 - progress, 3); // Ease-out cubic
+      return Math.floor(easedProgress * target * 1.2); // Overshoot by 20%
+    } else {
+      // Overshoot and settle phase
+      const overshootProgress = (elapsed - duration) / 200; // 200ms overshoot duration
+      const overshootValue = target + Math.sin(overshootProgress * Math.PI * 2) * 0.5;
+      return Math.max(0, Math.floor(overshootValue));
+    }
+  };
+
+  // Step 0 animations
+  useEffect(() => {
+    if (step === 0) {
+      // Reset animation states
+      setCountNumber(0);
+      setActiveListItems([]);
+      setDigitAnimations({
+        thousands: 0,
+        hundreds: 0,
+        tens: 0,
+        ones: 0
+      });
+      
+      // Individual digit animations with different speeds and overshoot
+      const updateInterval = 30; // Update every 30ms for smoother animation
+      
+      // Target digits for 3,780
+      const targets = {
+        thousands: 3,
+        hundreds: 7,
+        tens: 8,
+        ones: 0
+      };
+      
+      // Different durations for each digit (faster - complete in 1 second)
+      const durations = {
+        thousands: 200,  // 0.2 seconds
+        hundreds: 400,   // 0.4 seconds
+        tens: 700,       // 0.7 seconds
+        ones: 1000       // 1 second
+      };
+      
+      let startTime = Date.now();
+      
+      const digitInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        
+        setDigitAnimations({
+          thousands: getDigitValue(elapsed, durations.thousands, targets.thousands),
+          hundreds: getDigitValue(elapsed, durations.hundreds, targets.hundreds),
+          tens: getDigitValue(elapsed, durations.tens, targets.tens),
+          ones: getDigitValue(elapsed, durations.ones, targets.ones)
+        });
+        
+        // Clear when all animations are complete
+        if (elapsed >= Math.max(...Object.values(durations)) + 300) {
+          setDigitAnimations(targets);
+          clearInterval(digitInterval);
+        }
+      }, updateInterval);
+      
+      // List items activation (start after 1 second delay)
+      setTimeout(() => {
+        // Activate first item
+        setActiveListItems([0]);
+        
+        // Activate second item after 1000ms
+        setTimeout(() => {
+          setActiveListItems([0, 1]);
+          
+          // Activate third item after another 1000ms
+          setTimeout(() => {
+            setActiveListItems([0, 1, 2]);
+          }, 1000);
+        }, 1000);
+      }, 1000);
+      
+      return () => {
+        clearInterval(digitInterval);
+      };
+    }
+  }, [step]);
+
   const handleNextStep = () => {
     if (step === 1 && selectedUniversity) {
-      setStep(2);
+      changeStepWithTransition(2, 'forward');
     } else if (step === 2 && selectedMajor) {
-      setStep(3);
+      changeStepWithTransition(3, 'forward');
+    } else if (step === 3 && selectedMajor) {
       // 타이머 시작
       setCountdown(7);
       setIsTimerComplete(false);
-    } else if (step === 3 && isTimerComplete) {
-      setStep(4);
+      changeStepWithTransition(4, 'forward');
+    } else if (step === 4 && isTimerComplete) {
       setInterviewTime(600); // 10분 타이머 시작
+      changeStepWithTransition(5, 'forward');
     }
   };
 
@@ -361,7 +480,7 @@ export default function Home() {
     console.log(`[🎤${context}] 현재 상태 - isRecognitionActive: ${isRecognitionActive}, isInterviewerSpeaking: ${isInterviewerSpeaking}, isProcessingResponse: ${isProcessingResponse}, step: ${step}`);
     
     // Step 5에서는 시작하지 않음
-    if (step === 5) {
+    if (step === 6) {
       console.log(`[🎤${context}] Step 5에서는 음성 인식 시작 안 함`);
       return false;
     }
@@ -581,9 +700,10 @@ export default function Home() {
     const correctedInput = correctTranscript(userInput);
     
     // 대화 기록 업데이트 (함수형 업데이트로 최신 상태 보장)
-    const newConversationHistory = [...conversationHistory, `사용자: ${correctedInput}`];
+    const elapsedTime = 600 - interviewTime; // 면접 시작 후 경과 시간 (초)
+    const newConversationHistory = [...conversationHistory, {message: `사용자: ${correctedInput}`, timestamp: elapsedTime}];
     setConversationHistory(prev => {
-      const newHistory = [...prev, `사용자: ${correctedInput}`];
+      const newHistory = [...prev, {message: `사용자: ${correctedInput}`, timestamp: elapsedTime}];
       console.log('[handleUserResponse] 대화 기록 업데이트:', newHistory.length, '개');
       return newHistory;
     });
@@ -660,8 +780,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 답변은 반드시 ${transitionMessage ? '2-3문장' : '1-2문장'}으로 짧게 하세요.`
             },
             ...newConversationHistory.map(msg => ({
-              role: msg.startsWith('사용자:') ? 'user' : 'assistant',
-              content: msg.replace(/^(사용자|면접관):\s*/, '') // 정규식으로 정확히 제거
+              role: msg.message.startsWith('사용자:') ? 'user' : 'assistant',
+              content: msg.message.replace(/^(사용자|면접관):\s*/, '') // 정규식으로 정확히 제거
             }))
           ]
         })
@@ -678,8 +798,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       console.log('AI 응답:', aiResponse);
       
       // 대화 기록에 AI 응답 추가 (함수형 업데이트)
+      const elapsedTime = 600 - interviewTime; // 면접 시작 후 경과 시간 (초)
       setConversationHistory(prev => {
-        const newHistory = [...prev, `면접관: ${aiResponse}`];
+        const newHistory = [...prev, {message: `면접관: ${aiResponse}`, timestamp: elapsedTime}];
         console.log('[AI 응답] 대화 기록 업데이트:', newHistory.length, '개');
         return newHistory;
       });
@@ -733,7 +854,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
     
     // Step 5에서는 실행하지 않음
-    if (step === 5) {
+    if (step === 6) {
       console.log('면접 완료 화면에서는 면접관 음성 재생 안함');
       return;
     }
@@ -1219,7 +1340,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       setAudioLevel(average);
       
       // 계속 모니터링
-      if (step === 4) {
+              if (step === 5) {
         requestAnimationFrame(checkAudioLevel);
       }
     };
@@ -1292,7 +1413,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     let timer: NodeJS.Timeout | undefined;
     
     // 대기실 10초 카운트다운
-    if (step === 3 && countdown > 0) {
+          if (step === 4 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -1305,7 +1426,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
     
     // 면접 10분 타이머
-    if (step === 4 && interviewTime > 0) {
+          if (step === 5 && interviewTime > 0) {
       timer = setInterval(() => {
         setInterviewTime((prev) => {
           const newTime = prev - 1;
@@ -1397,7 +1518,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   
   // 음성 인식 자동 재시작 처리 (step 5에서는 작동하지 않도록)
   useEffect(() => {
-    if (step === 4 && !isInterviewerSpeaking && !isProcessingResponse && !isRecognitionActive) {
+    if (step === 5 && !isInterviewerSpeaking && !isProcessingResponse && !isRecognitionActive) {
       console.log('면접 중 음성 인식 자동 재시작 시도');
       const timer = setTimeout(() => {
         startRecognitionSafely('자동 재시작');
@@ -1406,7 +1527,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
     
     // Step 5로 전환되면 추가 정리 (이미 cleanup된 경우를 대비한 안전장치)
-    if (step === 5) {
+    if (step === 6) {
       // 음성 인식이 아직 실행 중이면 중지
       if (recognitionRef.current) {
         try {
@@ -1441,7 +1562,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
-    if (step === 4 && !hasAskedFirstQuestion) {
+    if (step === 5 && !hasAskedFirstQuestion) {
       setHasAskedFirstQuestion(true);
       setInterviewStatus('waiting');
       setStatusMessage('면접을 시작합니다...');
@@ -1461,7 +1582,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           
           // 2. 인사말 설정
           const initialQuestion = `안녕하세요! ${selectedUniversity?.name} ${selectedMajor} 면접에 오신 것을 환영합니다. 먼저 간단히 자기소개를 부탁드릴게요.`;
-          setConversationHistory([`면접관: ${initialQuestion}`]);
+          setConversationHistory([{message: `면접관: ${initialQuestion}`, timestamp: 0}]);
           
           // 3. 면접관 음성 재생 (완료까지 대기)
           console.log('[INIT] 면접관 인사말 시작');
@@ -1497,20 +1618,25 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
-      <div className="flex items-center justify-between p-4">
+      {step !== 0 && (
+        <div className="flex items-center justify-between p-4">
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
           onClick={() => {
-            if (step === 2) {
-              setStep(1);
+            if (step === 1) {
+              changeStepWithTransition(0, 'backward');
+            } else if (step === 2) {
+              changeStepWithTransition(1, 'backward');
+            } else if (step === 3) {
               setSelectedMajor("");
               setSearchTerm("");
               setIsDropdownOpen(false);
-            } else if (step === 3) {
-              setStep(2);
+              changeStepWithTransition(2, 'backward');
+            } else if (step === 4) {
               setCountdown(7);
               setIsTimerComplete(false);
-            } else if (step === 4) {
+              changeStepWithTransition(3, 'backward');
+            } else if (step === 5) {
               // 면접 중에는 나가기 확인
               if (confirm("면접을 종료하시겠습니까?")) {
                 // 완전한 오디오 정리 실행 (대화 기록도 초기화)
@@ -1545,10 +1671,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             }
           }}
         >
-          {(step === 2 || step === 3) ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          {(step === 1 || step === 2 || step === 3 || step === 4) ? (
+            <Image
+              src="/Icon_Chevron_Left.svg"
+              alt="뒤로가기"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
           ) : (
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1557,7 +1687,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         </button>
         
         {/* Complete Button - 면접 화면에서만 표시 */}
-        {step === 4 && (
+        {step === 5 && (
           <button
             onClick={() => {
               if (confirm("면접을 완료하시겠습니까?")) {
@@ -1579,11 +1709,154 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         )}
         
 
-      </div>
+        </div>
+      )}
+
+      {/* Step 0: Welcome/Entry Screen */}
+      {step === 0 && (
+        <div className="min-h-screen flex flex-col relative bg-gradient-to-b from-amber-800 via-orange-700 to-red-800 overflow-hidden">
+
+          {/* Top Gradient Overlay */}
+          <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-black to-transparent z-1 pointer-events-none"></div>
+          
+          {/* Bottom Gradient Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-black to-transparent z-20 pointer-events-none"></div>
+
+          {/* Transparent Header with X button */}
+          <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between p-4">
+            <button 
+              className="p-2 text-white hover:text-gray-300 transition-colors"
+              onClick={() => {
+                if (confirm("앱을 종료하시겠습니까?")) {
+                  window.close();
+                }
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col justify-center px-8 z-15">
+            {/* AI Interview Tag */}
+            <div className="mb-4">
+              <Image
+                src="/ai-interview-tag.svg"
+                alt="AI 면접 태그"
+                width={73}
+                height={24}
+                className="object-contain origin-left"
+                priority
+              />
+            </div>
+            
+            {/* Title */}
+            <div className="mb-4">
+              <h1 className="text-4xl font-bold text-white leading-tight">
+                <span className="inline-flex">
+                  <span className="transform transition-all duration-200">
+                    {digitAnimations.thousands}
+                  </span>
+                  <span>,</span>
+                  <span className="transform transition-all duration-200">
+                    {digitAnimations.hundreds}
+                  </span>
+                  <span className="transform transition-all duration-200">
+                    {digitAnimations.tens}
+                  </span>
+                  <span className="transform transition-all duration-200">
+                    {digitAnimations.ones}
+                  </span>
+                </span>
+                명 선생님들의<br />
+                면접 후기를 학습했어요!
+              </h1>
+            </div>
+            
+            {/* Features List */}
+            <div className="space-y-1 mb-12">
+              {[
+                "실제 면접 질문 데이터를 바탕으로 진행해요",
+                "면접 분석 리포트를 받을 수 있어요", 
+                "평균 합격 점수와 내 점수를 비교해보세요"
+              ].map((text, index) => {
+                const isActive = activeListItems.includes(index);
+                return (
+                  <div key={index} className={`flex items-center space-x-1 transition-all duration-700 ease-out ${
+                    isActive 
+                      ? 'opacity-100 transform translate-y-0' 
+                      : 'opacity-0 transform translate-y-1'
+                  }`}>
+                    <div className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
+                      isActive 
+                        ? 'bg-orange-500' 
+                        : 'bg-white/20 border-2 border-white/40'
+                    }`}>
+                      {isActive && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-white animate-fadeIn">
+                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </div>
+                    <span className={`text-white text-lg transition-all duration-500 ${
+                      isActive ? 'font-medium' : ''
+                    }`}>
+                      {text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Overlapping Images Container */}
+          <div className="relative w-full z-10">
+            {/* Graphic Element (Background) */}
+            <div className="w-full z-10">
+              <Image
+                src="/graphic.svg"
+                alt="면접 그래픽"
+                width={400}
+                height={300}
+                className="w-full h-auto object-contain opacity-30 transform -translate-y-20"
+                priority
+              />
+            </div>
+            
+            {/* Teachers Image (Foreground) - Fixed to bottom */}
+            <div className="absolute bottom-0 left-0 right-0 w-full z-10">
+              <Image
+                src="/teachers.png"
+                alt="선생님들"
+                width={800}
+                height={600}
+                className="w-full h-auto object-cover object-bottom scale-150 transform -translate-y-20"
+                priority
+              />
+            </div>
+          </div>
+          
+          {/* Fixed Bottom CTA */}
+          <div className="fixed bottom-0 left-0 right-0 z-23 pb-8 px-4">
+            <button
+              onClick={() => changeStepWithTransition(1, 'forward')}
+              className="w-full h-12 rounded-lg text-base font-medium bg-[#ff5500] text-white hover:bg-[#e64a00] transition-all duration-200 ease-in-out active:scale-95"
+            >
+              시작하기
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Step 1: University Selection */}
       {step === 1 && (
-        <div className="flex-1 flex flex-col items-center px-6 transition-all duration-500 ease-in-out animate-fadeIn">
+        <div className={`flex-1 flex flex-col items-center px-6 ${
+          isTransitioning ? 
+            (transitionDirection === 'forward' ? 'animate-slideOutLeft' : 'animate-slideOutRight') :
+            (transitionDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft')
+        }`}>
           <h1 className="text-[24px] font-bold mb-12 text-left w-full leading-relaxed">
             면접을 준비할<br />
             대학을 선택해주세요
@@ -1644,7 +1917,11 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 2: Major Selection */}
       {step === 2 && (
-        <div className="flex-1 flex flex-col px-6 transition-all duration-500 ease-in-out animate-fadeIn">
+        <div className={`flex-1 flex flex-col px-6 ${
+          isTransitioning ? 
+            (transitionDirection === 'forward' ? 'animate-slideOutLeft' : 'animate-slideOutRight') :
+            (transitionDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft')
+        }`}>
           <h1 className="text-[24px] font-bold mb-6 text-left leading-relaxed">
             {selectedUniversity?.name}을<br />
             지원하시는군요!
@@ -1708,7 +1985,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       )}
 
       {/* Step 3: Waiting Room */}
-      {step === 3 && (
+              {step === 5 && (
         <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
           {/* Background Image */}
           <div 
@@ -1969,19 +2246,22 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       )}
 
       {/* Step 5: Interview Completion */}
-      {step === 5 && (
-        <div className="flex-1 flex flex-col bg-black text-white transition-all duration-500 ease-in-out animate-slide-up">
+      {step === 6 && (
+        <div className="flex-1 flex flex-col bg-black text-white transition-all duration-500 ease-in-out animate-slide-up relative">
 
           {/* Chat History */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
 
             {conversationHistory.length > 0 ? (
-              conversationHistory.map((message, index) => {
-                const isInterviewer = message.startsWith('면접관:');
-                const isUser = message.startsWith('사용자:');
+              conversationHistory.map((item, index) => {
+                const isInterviewer = item.message.startsWith('면접관:');
+                const isUser = item.message.startsWith('사용자:');
                 // "면접관: " 또는 "사용자: " 제거 (공백 포함)
-                const messageText = message.startsWith('면접관:') ? message.substring(4) : message.startsWith('사용자:') ? message.substring(4) : message;
-                const timestamp = `${Math.floor(index / 2)}:${(index % 2 * 30).toString().padStart(2, '0')}`;
+                const messageText = item.message.startsWith('면접관:') ? item.message.substring(4) : item.message.startsWith('사용자:') ? item.message.substring(4) : item.message;
+                // 실제 경과 시간을 분:초 형식으로 변환
+                const elapsedMinutes = Math.floor(item.timestamp / 60);
+                const elapsedSeconds = item.timestamp % 60;
+                const timestamp = `${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}`;
                 
                 return (
                   <div 
@@ -1990,7 +2270,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className={`max-w-[80%] ${isInterviewer ? 'order-1' : 'order-2'}`}>
-                      <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${isInterviewer ? 'bg-gray-600 text-white' : 'bg-gray-400 text-white'}`}>
+                      <div className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-lg ${isInterviewer ? 'bg-gray-600/10 border border-gray-600 text-white' : 'bg-gray-700 text-white'}`}>
                         {messageText}
                       </div>
                     </div>
@@ -2010,8 +2290,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="p-4 space-y-3 border-t border-gray-800">
+          {/* Action Buttons - Fixed at bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black">
             <button
               onClick={() => {
                 // 분석 리포트 받기 기능 (향후 구현)
