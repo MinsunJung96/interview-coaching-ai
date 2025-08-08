@@ -152,7 +152,7 @@ export default function Home() {
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [countdown, setCountdown] = useState(7);
+  const [countdown, setCountdown] = useState(5);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
@@ -347,7 +347,7 @@ export default function Home() {
       changeStepWithTransition(2, 'forward');
     } else if (step === 2 && selectedMajor) {
       // 타이머 시작
-      setCountdown(7);
+      setCountdown(5);
       setIsTimerComplete(false);
       changeStepWithTransition(3, 'forward');
     } else if (step === 3 && isTimerComplete) {
@@ -1623,7 +1623,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             } else if (step === 2) {
               changeStepWithTransition(1, 'backward');
             } else if (step === 3) {
-              setCountdown(7);
+              setCountdown(5);
               setIsTimerComplete(false);
               changeStepWithTransition(2, 'backward');
             } else if (step === 4) {
@@ -2016,7 +2016,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     ${isTimerComplete ? 'w-full' : ''}
                   `}
                   style={{
-                    width: isTimerComplete ? '100%' : `${((7 - countdown) / 7) * 100}%`
+                    width: isTimerComplete ? '100%' : `${((5 - countdown) / 5) * 100}%`
                   }}
                 ></div>
                 
