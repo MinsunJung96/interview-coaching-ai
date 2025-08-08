@@ -2561,17 +2561,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {/* Sample Report Modal */}
       {showSampleModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
+          <div className="bg-[#2A2A2A] border border-[#525252] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
             <div className="text-center">
               {/* Sample SVG Icon */}
               <div className="flex justify-center mb-4">
-                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="48" height="48" rx="8" fill="#ff5500" fillOpacity="0.1"/>
-                  <rect x="1" y="1" width="46" height="46" rx="7" stroke="#ff5500" strokeOpacity="0.3"/>
-                  <path d="M14 18h20M14 24h16M14 30h12" stroke="#ff5500" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="34" cy="14" r="6" fill="#ff5500"/>
-                  <text x="34" y="18" textAnchor="middle" className="fill-white text-xs font-bold">샘플</text>
-                </svg>
+                <img 
+                  src="/Sample.svg" 
+                  alt="샘플" 
+                  width={48} 
+                  height={48}
+                  className="object-contain"
+                />
               </div>
               
               <h3 className="text-white text-lg font-bold mb-2">샘플 리포트 보고 있어요.</h3>
@@ -2580,9 +2580,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               <div className="flex space-x-3">
                 <button 
                   onClick={() => setShowSampleModal(false)}
-                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
-                  닫기
+                  샘플 이어서 보기
                 </button>
                 <button 
                   onClick={() => {
