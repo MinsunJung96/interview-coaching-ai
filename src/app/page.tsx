@@ -136,8 +136,7 @@ interface University {
 export default function Home() {
   const isClient = useClientOnly();
   const [step, setStep] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [transitionDirection, setTransitionDirection] = useState<'forward' | 'backward'>('forward');
+
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   
   // Animation states for Step 0
@@ -241,17 +240,9 @@ export default function Home() {
     setSelectedUniversity(university);
   };
 
-  // Smooth step transition function
+  // Simple step transition function
   const changeStepWithTransition = (newStep: number, direction: 'forward' | 'backward' = 'forward') => {
-    setIsTransitioning(true);
-    setTransitionDirection(direction);
-    
-    setTimeout(() => {
-      setStep(newStep);
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 50);
-    }, 300);
+    setStep(newStep);
   };
 
   // Function to calculate digit value with overshoot effect
@@ -350,15 +341,13 @@ export default function Home() {
     if (step === 1 && selectedUniversity) {
       changeStepWithTransition(2, 'forward');
     } else if (step === 2 && selectedMajor) {
-      changeStepWithTransition(3, 'forward');
-    } else if (step === 3 && selectedMajor) {
       // 타이머 시작
       setCountdown(7);
       setIsTimerComplete(false);
-      changeStepWithTransition(4, 'forward');
-    } else if (step === 4 && isTimerComplete) {
+      changeStepWithTransition(3, 'forward');
+    } else if (step === 3 && isTimerComplete) {
       setInterviewTime(600); // 10분 타이머 시작
-      changeStepWithTransition(5, 'forward');
+      changeStepWithTransition(4, 'forward');
     }
   };
 
@@ -1412,8 +1401,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
     
-    // 대기실 10초 카운트다운
-          if (step === 4 && countdown > 0) {
+    // 대기실 7초 카운트다운
+    if (step === 3 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -1426,7 +1415,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
     
     // 면접 10분 타이머
-          if (step === 5 && interviewTime > 0) {
+    if (step === 4 && interviewTime > 0) {
       timer = setInterval(() => {
         setInterviewTime((prev) => {
           const newTime = prev - 1;
@@ -1518,7 +1507,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   
   // 음성 인식 자동 재시작 처리 (step 5에서는 작동하지 않도록)
   useEffect(() => {
-    if (step === 5 && !isInterviewerSpeaking && !isProcessingResponse && !isRecognitionActive) {
+    if (step === 4 && !isInterviewerSpeaking && !isProcessingResponse && !isRecognitionActive) {
       console.log('면접 중 음성 인식 자동 재시작 시도');
       const timer = setTimeout(() => {
         startRecognitionSafely('자동 재시작');
@@ -1562,7 +1551,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
-    if (step === 5 && !hasAskedFirstQuestion) {
+    if (step === 4 && !hasAskedFirstQuestion) {
       setHasAskedFirstQuestion(true);
       setInterviewStatus('waiting');
       setStatusMessage('면접을 시작합니다...');
@@ -1628,15 +1617,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             } else if (step === 2) {
               changeStepWithTransition(1, 'backward');
             } else if (step === 3) {
-              setSelectedMajor("");
-              setSearchTerm("");
-              setIsDropdownOpen(false);
-              changeStepWithTransition(2, 'backward');
-            } else if (step === 4) {
               setCountdown(7);
               setIsTimerComplete(false);
-              changeStepWithTransition(3, 'backward');
-            } else if (step === 5) {
+              changeStepWithTransition(2, 'backward');
+            } else if (step === 4) {
               // 면접 중에는 나가기 확인
               if (confirm("면접을 종료하시겠습니까?")) {
                 // 완전한 오디오 정리 실행 (대화 기록도 초기화)
@@ -1687,7 +1671,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         </button>
         
         {/* Complete Button - 면접 화면에서만 표시 */}
-        {step === 5 && (
+        {step === 4 && (
           <button
             onClick={() => {
               if (confirm("면접을 완료하시겠습니까?")) {
@@ -1852,11 +1836,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 1: University Selection */}
       {step === 1 && (
-        <div className={`flex-1 flex flex-col items-center px-6 ${
-          isTransitioning ? 
-            (transitionDirection === 'forward' ? 'animate-slideOutLeft' : 'animate-slideOutRight') :
-            (transitionDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft')
-        }`}>
+        <div key="step-1" className="flex-1 flex flex-col items-center px-6 animate-slideInRight">
           <h1 className="text-[24px] font-bold mb-12 text-left w-full leading-relaxed">
             면접을 준비할<br />
             대학을 선택해주세요
@@ -1917,11 +1897,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 2: Major Selection */}
       {step === 2 && (
-        <div className={`flex-1 flex flex-col px-6 ${
-          isTransitioning ? 
-            (transitionDirection === 'forward' ? 'animate-slideOutLeft' : 'animate-slideOutRight') :
-            (transitionDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft')
-        }`}>
+        <div key="step-2" className="flex-1 flex flex-col px-6 animate-slideInRight">
           <h1 className="text-[24px] font-bold mb-6 text-left leading-relaxed">
             {selectedUniversity?.name}을<br />
             지원하시는군요!
@@ -1985,8 +1961,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       )}
 
       {/* Step 3: Waiting Room */}
-              {step === 5 && (
-        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
+      {step === 3 && (
+        <div key="step-3" className="flex-1 flex flex-col relative animate-slideInRight">
           {/* Background Image */}
           <div 
             className="absolute inset-0 bg-cover bg-center"
@@ -2048,7 +2024,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div className="flex-1 flex flex-col relative transition-all duration-500 ease-in-out animate-fadeIn">
+        <div key="step-4" className="flex-1 flex flex-col relative animate-slideInRight">
           {/* Main Interview Video Area */}
           <div className="flex-1 relative">
             {/* Interviewer Video Background */}
@@ -2246,8 +2222,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       )}
 
       {/* Step 5: Interview Completion */}
-      {step === 6 && (
-        <div className="flex-1 flex flex-col bg-black text-white transition-all duration-500 ease-in-out animate-slide-up relative">
+      {step === 5 && (
+        <div key="step-5" className="flex-1 flex flex-col bg-black text-white animate-slideInRight relative">
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
