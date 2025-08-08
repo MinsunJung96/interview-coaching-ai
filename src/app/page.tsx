@@ -2395,19 +2395,24 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               </svg>
             </button>
             
-            <h1 className="text-[20px] font-bold text-white">면접 분석 리포트</h1>
+            <div></div>
             
             <button className="p-2 text-white hover:text-gray-300 transition-colors">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 9L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M8 13L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+              <Image
+                src="/Icon_Presentation-chart-bar.svg"
+                alt="차트"
+                width={24}
+                height={24}
+                className="object-contain"
+              />
             </button>
           </div>
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto px-6 py-6">
+            
+            {/* 페이지 타이틀 */}
+            <h1 className="text-[32px] font-bold text-white mb-8">면접 분석 리포트</h1>
             
             {/* 평가 항목별 점수 테이블 */}
             <div className="mb-8">
