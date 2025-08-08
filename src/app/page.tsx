@@ -1661,6 +1661,22 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step]);
 
+  // 모달이 표시될 때 스크롤 비활성화
+  useEffect(() => {
+    if (showSampleModal) {
+      // 모달이 열릴 때 스크롤 막기
+      document.body.style.overflow = 'hidden';
+    } else {
+      // 모달이 닫힐 때 스크롤 복원
+      document.body.style.overflow = 'unset';
+    }
+
+    // 컴포넌트 언마운트 시 스크롤 복원
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showSampleModal]);
+
   // 클라이언트에서만 렌더링 (Hydration 에러 방지) - 임시 비활성화
   // if (!isClient) {
   //   return (
