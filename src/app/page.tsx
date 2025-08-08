@@ -383,6 +383,21 @@ export default function Home() {
   const completeAudioCleanup = (preserveConversation: boolean = false) => {
     console.log('[CLEANUP] 완전한 오디오 정리 시작');
     
+    // 0. 현재 재생 중인 모든 오디오 즉시 중단
+    if ('speechSynthesis' in window) {
+      speechSynthesis.cancel();
+      console.log('[CLEANUP] Speech synthesis 즉시 중단');
+    }
+    
+    // 현재 재생 중인 HTML 오디오 엘리먼트들도 중단
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = '';
+      console.log('[CLEANUP] HTML Audio 엘리먼트 중단');
+    });
+    
     // 1. 음성 인식 정리
     if (recognitionRef.current) {
       try {
@@ -411,7 +426,7 @@ export default function Home() {
       }
     }
     
-    // 2. 음성 합성 정리
+    // 2. 음성 합성 정리 (한번 더 확실히)
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
       console.log('[CLEANUP] Speech synthesis 정리 완료');
@@ -461,8 +476,21 @@ export default function Home() {
     setIsProcessingResponse(false);
     setInterviewStatus('waiting');
     setInterimTranscript('');
+    setAudioLevel(0); // 음성 레벨도 초기화
     
     setCurrentInterviewerText('');
+    
+    // 8. 현재 재생 중인 비디오도 초기화
+    setCurrentInterviewerVideo('interviewer-listening');
+    setIsInterviewerMouthOpen(false);
+    
+    // 9. 면접 관련 타이머들 정리
+    // 전역 interval과 timeout들 정리 (현재 진행 중인 면접 프로세스 중단)
+    const allTimeouts = window.setTimeout(() => {}, 0);
+    for (let i = 1; i <= allTimeouts; i++) {
+      window.clearTimeout(i);
+    }
+    console.log('[CLEANUP] 모든 timeout 정리 완료');
     
     // 대화 기록은 preserveConversation이 false일 때만 초기화
     if (!preserveConversation) {
@@ -1667,6 +1695,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             } else if (step === 5) {
               // 완료 화면에서 메인으로 돌아가기
               if (confirm("메인 화면으로 돌아가시겠습니까?")) {
+                // 완전한 오디오 정리 실행 (대화 기록도 초기화)
+                completeAudioCleanup(false);
+                
                 setStep(1);
                 setSelectedUniversity(null);
                 setSelectedMajor("");
