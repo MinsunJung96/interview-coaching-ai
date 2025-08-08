@@ -311,7 +311,7 @@ export default function Home() {
           ones: 1000       // 1 second
         };
         
-        let startTime = Date.now();
+        const startTime = Date.now();
         
         const digitInterval = setInterval(() => {
           const elapsed = Date.now() - startTime;
@@ -2527,7 +2527,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               }`}>전공 적합성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
-                  지원자가 디자인과 공학 융합이라는 학과 특성을 정확히 이해하고 있습니다. '스마트 라이프' 공모전 경험과 사용자 경험(UX), 인터랙션 디자인에 대한 구체적인 관심사를 제시하였으며, 전동카트 조작판 개선 사례를 통해 전공 관련 문제 해결 경험과 적용 능력을 입증했습니다.
+                  지원자가 디자인과 공학 융합이라는 학과 특성을 정확히 이해하고 있습니다. &lsquo;스마트 라이프&rsquo; 공모전 경험과 사용자 경험(UX), 인터랙션 디자인에 대한 구체적인 관심사를 제시하였으며, 전동카트 조작판 개선 사례를 통해 전공 관련 문제 해결 경험과 적용 능력을 입증했습니다.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
@@ -2813,7 +2813,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             <div className="text-center">
               {/* Sample SVG Icon */}
               <div className="flex justify-center mb-4">
-                <img 
+                <Image 
                   src="/Sample.svg" 
                   alt="샘플" 
                   width={72} 
