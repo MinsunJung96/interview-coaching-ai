@@ -178,6 +178,9 @@ export default function Home() {
   const [lastPhase, setLastPhase] = useState<'intro' | 'major' | 'personality' | 'social' | 'university'>('intro');
   const [phaseTransitionPending, setPhaseTransitionPending] = useState(false);
   const [forcePhaseTransition, setForcePhaseTransition] = useState(false);
+  
+  // Analysis Report Banner State
+  const [showReportBanner, setShowReportBanner] = useState(false);
   const [lastTransitionTime, setLastTransitionTime] = useState<number>(600);
 
   // 시간 기반 면접 단계 결정 함수
@@ -1602,6 +1605,21 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step]); // hasAskedFirstQuestion 의존성 제거
 
+  // Step 6 (Analysis Report) 배너 애니메이션
+  useEffect(() => {
+    if (step === 6) {
+      // 배너 상태 초기화
+      setShowReportBanner(false);
+      
+      // 0.5초 후 배너 슬라이드 인
+      const timer = setTimeout(() => {
+        setShowReportBanner(true);
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
+
   // 클라이언트에서만 렌더링 (Hydration 에러 방지) - 임시 비활성화
   // if (!isClient) {
   //   return (
@@ -2325,8 +2343,29 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </button>
           </div>
 
+          {/* Report Banner */}
+          <div className={`overflow-hidden transition-all duration-500 ease-out ${
+            showReportBanner ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+          }`}>
+            <div className="bg-[#121212] border border-[#3D3D3D] mx-6 rounded-xl p-4 mb-4">
+              <div className="text-center">
+                <p className="text-gray-300 text-sm mb-2">샘플 리포트 보고 있어요.</p>
+                <p className="text-white text-sm mb-3">실제 리포트를 받아보고 싶으신가요?</p>
+                <button 
+                  onClick={() => {
+                    alert('실제 면접을 진행해보세요!');
+                    setStep(0); // 메인으로 이동
+                  }}
+                  className="bg-[#ff5500] hover:bg-[#e64a00] text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  네, 받아볼래요
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex-1 overflow-y-auto px-6 py-0">
             
             {/* 평가 항목별 점수 테이블 */}
             <div className="mb-8">
