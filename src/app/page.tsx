@@ -1604,9 +1604,26 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step, isInterviewerSpeaking, isProcessingResponse, isRecognitionActive, recognition]);
   
+  // Step 변경 시 면접 상태 완전 초기화
+  useEffect(() => {
+    if (step !== 4) {
+      // 면접 화면이 아닐 때 모든 면접 관련 상태 초기화
+      setHasAskedFirstQuestion(false);
+      setIsInterviewerSpeaking(false);
+      setIsProcessingResponse(false);
+      setIsListening(false);
+      setIsMicOn(true);
+      setInterviewStatus('waiting');
+      setCurrentInterviewerText('');
+      
+      // 진행 중인 오디오 정리
+      completeAudioCleanup();
+    }
+  }, [step]);
+
   // 면접 시작 시 첫 질문 및 음성 인식 시작
   useEffect(() => {
-    if (step === 4 && !hasAskedFirstQuestion) {
+    if (step === 4 && !hasAskedFirstQuestion && selectedUniversity && selectedMajor) {
       setHasAskedFirstQuestion(true);
       setInterviewStatus('waiting');
       // setStatusMessage('면접을 시작합니다...');
@@ -1647,7 +1664,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         startInterview();
       }, 500);
     }
-  }, [step]); // hasAskedFirstQuestion 의존성 제거
+  }, [step, hasAskedFirstQuestion, selectedUniversity?.name, selectedMajor]);
 
   // Step 6 (Analysis Report) 모달 애니메이션
   useEffect(() => {
