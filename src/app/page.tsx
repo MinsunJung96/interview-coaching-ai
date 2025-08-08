@@ -169,7 +169,7 @@ export default function Home() {
   const [interimTranscript, setInterimTranscript] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
   const [interviewStatus, setInterviewStatus] = useState<'waiting' | 'listening' | 'processing' | 'speaking' | 'user_turn'>('waiting');
-  const [statusMessage, setStatusMessage] = useState("");
+
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [microphone, setMicrophone] = useState<MediaStream | null>(null);
@@ -457,7 +457,7 @@ export default function Home() {
     setIsProcessingResponse(false);
     setInterviewStatus('waiting');
     setInterimTranscript('');
-    setStatusMessage('');
+    
     setCurrentInterviewerText('');
     
     // 대화 기록은 preserveConversation이 false일 때만 초기화
@@ -554,7 +554,7 @@ export default function Home() {
           setIsListening(true);
           setIsRecognitionActive(true);
           setInterviewStatus('listening');
-          setStatusMessage('듣고 있습니다...');
+          // setStatusMessage('듣고 있습니다...');
         };
         
         recog.onresult = (event: any) => {
@@ -676,8 +676,8 @@ export default function Home() {
     // 빈 입력이거나 너무 짧으면 알림 표시
     if (!userInput || userInput.trim().length < 2) {
       console.log('입력이 너무 짧음, 무시됨');
-      setStatusMessage('응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.');
-      setTimeout(() => setStatusMessage(''), 3000);
+      // setStatusMessage('응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.');
+      setTimeout(() => // setStatusMessage(''), 3000);
       
       // 짧은 입력 후 음성 인식 재시작
       setTimeout(() => {
@@ -688,7 +688,7 @@ export default function Home() {
     
     setIsProcessingResponse(true);
     setInterviewStatus('processing');
-    setStatusMessage('답변을 처리하고 있습니다...');
+    // setStatusMessage('답변을 처리하고 있습니다...');
     
     // 음성 인식 텍스트 보정
     const correctedInput = correctTranscript(userInput);
@@ -915,7 +915,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       // 면접관 말하기 시작
       setCurrentInterviewerText(text);
       setInterviewStatus('speaking');
-      setStatusMessage('면접관이 말하고 있습니다...');
+      // setStatusMessage('면접관이 말하고 있습니다...');
       updateInterviewerVideo(true); // 면접관이 말할 때
 
       // OpenAI Voice API 호출
@@ -976,7 +976,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         // 5. 상태 업데이트
         setIsMicOn(true);
         setInterviewStatus('user_turn');
-        setStatusMessage('이제 답변해 주세요');
+        // setStatusMessage('이제 답변해 주세요');
         
         // 6. 음성 인식 즉시 재시작
         console.log('[AUDIO] 음성 인식 재시작 시도');
@@ -984,7 +984,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         if (started) {
           console.log('[AUDIO] 음성 인식 재시작 성공');
           setInterviewStatus('listening');
-          setStatusMessage('듣고 있습니다...');
+          // setStatusMessage('듣고 있습니다...');
           setIsListening(true); // 추가: isListening 상태도 설정
         } else {
           console.error('[AUDIO] 음성 인식 재시작 실패');
@@ -993,7 +993,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             const retryStarted = startRecognitionSafely('면접관 말하기 끝 - 재시도');
             if (retryStarted) {
               setInterviewStatus('listening');
-              setStatusMessage('듣고 있습니다...');
+              // setStatusMessage('듣고 있습니다...');
               setIsListening(true); // 추가: isListening 상태도 설정
             }
           }, 1000);
@@ -1111,7 +1111,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             // 4. 상태 업데이트
             setIsMicOn(true);
             setInterviewStatus('user_turn');
-            setStatusMessage('이제 답변해 주세요');
+            // setStatusMessage('이제 답변해 주세요');
             
             // 5. 음성 인식 즉시 재시작
             setTimeout(() => {
@@ -1120,7 +1120,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               if (started) {
                 console.log('[AUDIO-FALLBACK] 음성 인식 재시작 성공');
                 setInterviewStatus('listening');
-                setStatusMessage('듣고 있습니다...');
+                // setStatusMessage('듣고 있습니다...');
                 setIsListening(true); // 추가: isListening 상태도 설정
               } else {
                 console.error('[AUDIO-FALLBACK] 음성 인식 재시작 실패');
@@ -1129,7 +1129,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   const retryStarted = startRecognitionSafely('면접관 말하기 끝 - 폴백 재시도');
                   if (retryStarted) {
                     setInterviewStatus('listening');
-                    setStatusMessage('듣고 있습니다...');
+                    // setStatusMessage('듣고 있습니다...');
                     setIsListening(true); // 추가: isListening 상태도 설정
                   }
                 }, 1000);
@@ -1239,8 +1239,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           // 빈 결과가 final로 오면 알림
           console.log('빈 음성 입력 감지');
           setInterimTranscript("");
-          setStatusMessage('음성이 잘 인식되지 않았습니다. 다시 말씀해주세요.');
-          setTimeout(() => setStatusMessage(''), 3000);
+          // setStatusMessage('음성이 잘 인식되지 않았습니다. 다시 말씀해주세요.');
+          setTimeout(() => // setStatusMessage(''), 3000);
         }
       };
 
@@ -1267,7 +1267,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         // 면접관이 말하고 있지 않을 때만 상태 업데이트
         if (!isInterviewerSpeaking && !isProcessingResponse) {
           setInterviewStatus('listening');
-          setStatusMessage('듣고 있습니다...');
+          // setStatusMessage('듣고 있습니다...');
         }
       };
 
@@ -1559,7 +1559,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     if (step === 4 && !hasAskedFirstQuestion) {
       setHasAskedFirstQuestion(true);
       setInterviewStatus('waiting');
-      setStatusMessage('면접을 시작합니다...');
+      // setStatusMessage('면접을 시작합니다...');
       
       // 즉시 첫 질문 실행 (딜레이 최소화)
       const startInterview = async () => {
@@ -1569,7 +1569,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           const hasPermission = await requestMicrophonePermission();
           if (!hasPermission) {
             console.error('[INIT] 마이크 권한 획득 실패');
-            setStatusMessage('마이크 권한이 필요합니다');
+            // setStatusMessage('마이크 권한이 필요합니다');
             return;
           }
           console.log('[INIT] 마이크 권한 획득 성공');
@@ -1588,7 +1588,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           console.log('[INIT] 초기화 완료 - 음성 인식은 audio.onended에서 시작됨');
         } catch (error) {
           console.error('[INIT] 면접 시작 오류:', error);
-          setStatusMessage('면접 시작 중 오류가 발생했습니다');
+          // setStatusMessage('면접 시작 중 오류가 발생했습니다');
         }
       };
       
@@ -2056,19 +2056,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
               <div className="bg-black/70 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                {/* 면접 단계 표시 */}
-                <div className="flex items-center justify-between mb-2">
+                {/* 면접 단계와 타이머를 같은 줄에 배치 */}
+                <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-gray-400">현재 단계:</span>
                     <span className="text-sm font-medium text-white bg-white/20 px-2 py-1 rounded">
                       {getPhaseGuideline(getInterviewPhase(interviewTime)).name}
                     </span>
                   </div>
-
-                </div>
-                
-                {/* 타이머 영역 */}
-                <div className="flex items-center justify-end mb-3">
                   
                   {/* 타이머 */}
                   <div className={`px-3 py-1 rounded-lg text-sm font-mono font-bold ${
@@ -2076,6 +2071,39 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   }`}>
                     {formatTime(interviewTime)}
                   </div>
+                </div>
+                
+                {/* 면접관 상태 표시 */}
+                <div className="flex items-center justify-center mb-2">
+                  {isInterviewerSpeaking ? (
+                    <div className="flex items-center space-x-2 bg-blue-900/30 text-blue-400 rounded-lg px-3 py-2">
+                      <div className="flex space-x-1">
+                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse"></div>
+                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                      </div>
+                      <span className="text-sm">면접관이 말하는 중</span>
+                    </div>
+                  ) : interviewStatus === 'user_turn' ? (
+                    <div className="flex items-center space-x-2 bg-green-900/30 text-green-400 rounded-lg px-3 py-2">
+                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-sm">답변해 주세요</span>
+                    </div>
+                  ) : isListening ? (
+                    <div className="flex items-center space-x-2 bg-purple-900/30 text-purple-400 rounded-lg px-3 py-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                      </div>
+                      <span className="text-sm">듣는 중</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2 bg-gray-900/30 text-gray-400 rounded-lg px-3 py-2">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <span className="text-sm">대기 중</span>
+                    </div>
+                  )}
                 </div>
                 
                 {/* 음성 레벨 바 */}
@@ -2102,12 +2130,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   </div>
                 )}
                 
-                {/* 상태 메시지 */}
-                {statusMessage && (
-                  <div className="bg-yellow-900/30 text-yellow-400 rounded-lg p-2 mt-2">
-                    <p className="text-sm">{statusMessage}</p>
-                  </div>
-                )}
+
               </div>
             </div>
 
