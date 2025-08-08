@@ -2591,7 +2591,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               </div>
               
               <h3 className="text-white text-lg font-bold mb-2">현재 샘플 리포트를 보고 계세요</h3>
-              <p className="text-gray-300 text-lg mb-6">실제 리포트를 받아보고 싶으신가요?</p>
+              <p className="text-gray-300 text-lg mb-2">실제 리포트를 받아보고 싶으신가요?</p>
+              <p className="text-[#ff5500] text-sm font-medium mb-6">🎁 1회 무료로 받아보실 수 있어요!</p>
               
               <div className="flex space-x-3">
                 <button 
