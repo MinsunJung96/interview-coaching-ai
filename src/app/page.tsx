@@ -2057,6 +2057,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Header Gradient Overlay for Readability */}
           <div className="fixed top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
           
+          {/* Voice Level Gradient Overlay (마이크 ON 상태일 때만) */}
+          {isMicOn && !isInterviewerSpeaking && (
+            <div 
+              className="fixed bottom-0 left-0 right-0 transition-all duration-150 ease-out z-15 pointer-events-none"
+              style={{
+                height: `${Math.max(0, (audioLevel / 255) * 40)}%`,
+                background: 'linear-gradient(to top, rgba(255, 85, 0, 0.5) 0%, transparent 100%)',
+              }}
+            />
+          )}
+          
           {/* Main Interview Content Area */}
           <div className="flex-1 relative z-10">
             
@@ -2166,18 +2177,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     </div>
                   )}
                   
-                  {/* 음성 레벨 표시 그라데이션 오버레이 (마이크 ON 상태일 때만) */}
-                  {isMicOn && !isInterviewerSpeaking && (
-                    <div 
-                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 transition-all duration-150 ease-out"
-                      style={{
-                        width: '80px',
-                        height: `${Math.max(0, (audioLevel / 255) * 100)}px`,
-                        background: 'linear-gradient(to top, #FF5500 50%, transparent 100%)',
-                        borderRadius: '40px 40px 0 0',
-                      }}
-                    />
-                  )}
+
                   
                   {/* 마이크 버튼 - 크기 확대 */}
                   <button
