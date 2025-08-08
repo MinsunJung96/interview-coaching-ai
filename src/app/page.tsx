@@ -1607,7 +1607,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
-      {step !== 0 && (
+      {step !== 0 && step !== 6 && (
         <div className="flex items-center justify-between p-4">
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
@@ -1652,13 +1652,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 setLastPhase('intro');
                 setPhaseTransitionPending(false);
               }
-            } else if (step === 6) {
-              // 분석 리포트에서 면접 완료 화면으로 돌아가기
-              setStep(5);
-            }
+
           }}
         >
-          {(step === 1 || step === 2 || step === 3 || step === 4 || step === 6) ? (
+          {(step === 1 || step === 2 || step === 3 || step === 4) ? (
             <Image
               src="/Icon_Chevron_Left.svg"
               alt="뒤로가기"
@@ -2261,18 +2258,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {step === 6 && (
         <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
-          {/* Header */}
-          <div className="flex items-center justify-between p-4">
-            <button 
-              onClick={() => setStep(5)}
-              className="p-2 text-white hover:text-gray-300 transition-colors"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <h1 className="text-xl font-bold">면접 분석 리포트</h1>
-            <div className="w-10"></div>
+          {/* Page Title */}
+          <div className="px-6 pt-6 pb-4">
+            <h1 className="text-[28px] font-bold text-white text-left">면접 분석 리포트</h1>
           </div>
 
           {/* Content */}
