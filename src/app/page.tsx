@@ -1652,7 +1652,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 setLastPhase('intro');
                 setPhaseTransitionPending(false);
               }
-
+            }
           }}
         >
           {(step === 1 || step === 2 || step === 3 || step === 4) ? (
