@@ -1889,7 +1889,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col justify-center px-8 z-15">
+          <div className="flex-1 flex flex-col pt-24 px-8 z-15">
             {/* AI Interview Tag */}
             <div className="mb-4">
               <Image
@@ -1906,17 +1906,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             <div className="mb-4">
               <h1 className="text-4xl font-bold text-white leading-tight">
                 <span className="inline-flex">
-                  <span className="transform transition-all duration-200">
+                  <span>
                     {digitAnimations.thousands}
                   </span>
                   <span>,</span>
-                  <span className="transform transition-all duration-200">
+                  <span>
                     {digitAnimations.hundreds}
                   </span>
-                  <span className="transform transition-all duration-200">
+                  <span>
                     {digitAnimations.tens}
                   </span>
-                  <span className="transform transition-all duration-200">
+                  <span>
                     {digitAnimations.ones}
                   </span>
                 </span>
@@ -1976,7 +1976,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
             
             {/* Teachers Image (Foreground) - Fixed to bottom */}
-            <div className={`absolute bottom-0 left-0 right-0 w-full z-10 transition-all duration-1000 ease-out ${
+            <div className={`absolute bottom-0 left-0 right-0 w-full z-23 transition-all duration-1000 ease-out ${
               isTeachersVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
               <Image
@@ -1991,12 +1991,12 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
           
           {/* Fixed Bottom CTA */}
-          <div className="fixed bottom-0 left-0 right-0 z-23 pb-8 px-4">
+          <div className="fixed bottom-0 left-0 right-0 z-30 pb-8 px-4">
             <button
               onClick={() => changeStepWithTransition(1, 'forward')}
               className="w-full h-12 rounded-lg text-base font-medium bg-[#ff5500] text-white hover:bg-[#e64a00] transition-all duration-200 ease-in-out active:scale-95"
             >
-              면접볼 대학 선택하기
+              면접 볼 대학 선택하기
             </button>
           </div>
         </div>
