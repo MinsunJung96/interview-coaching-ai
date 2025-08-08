@@ -2036,9 +2036,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             
             {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
-              <div className="bg-black/70 backdrop-blur-sm rounded-xl p-4 shadow-lg">
+              <div className="bg-black/70 backdrop-blur-sm rounded-xl px-4 py-3 shadow-lg">
                 {/* 면접 단계, 상태, 타이머를 같은 줄에 배치 */}
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     {/* 현재 단계 */}
                     <div className="flex items-center space-x-2">
