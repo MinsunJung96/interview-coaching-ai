@@ -167,7 +167,7 @@ export default function Home() {
   const [useVoiceAPI, setUseVoiceAPI] = useState(true);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
-  const [audioLevel, setAudioLevel] = useState(0);
+
   const [interviewStatus, setInterviewStatus] = useState<'waiting' | 'listening' | 'processing' | 'speaking' | 'user_turn'>('waiting');
 
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
@@ -676,8 +676,8 @@ export default function Home() {
     // 빈 입력이거나 너무 짧으면 알림 표시
     if (!userInput || userInput.trim().length < 2) {
       console.log('입력이 너무 짧음, 무시됨');
-      // setStatusMessage('응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.');
-      setTimeout(() => // setStatusMessage(''), 3000);
+          // setStatusMessage('응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.');
+    // setTimeout(() => setStatusMessage(''), 3000);
       
       // 짧은 입력 후 음성 인식 재시작
       setTimeout(() => {
@@ -1239,8 +1239,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           // 빈 결과가 final로 오면 알림
           console.log('빈 음성 입력 감지');
           setInterimTranscript("");
-          // setStatusMessage('음성이 잘 인식되지 않았습니다. 다시 말씀해주세요.');
-          setTimeout(() => // setStatusMessage(''), 3000);
+              // setStatusMessage('음성이 잘 인식되지 않았습니다. 다시 말씀해주세요.');
+    // setTimeout(() => setStatusMessage(''), 3000);
         }
       };
 
@@ -1310,8 +1310,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         setAnalyser(analyserNode);
         setMicrophone(stream);
         
-        // 음성 레벨 모니터링 시작
-        startAudioLevelMonitoring(analyserNode);
+
       }
       
       return true;
@@ -1322,25 +1321,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   };
   
-  // 음성 레벨 모니터링
-  const startAudioLevelMonitoring = (analyserNode: AnalyserNode) => {
-    const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
-    
-    const checkAudioLevel = () => {
-      if (!analyserNode) return;
-      
-      analyserNode.getByteFrequencyData(dataArray);
-      const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-      setAudioLevel(average);
-      
-      // 계속 모니터링
-              if (step === 5) {
-        requestAnimationFrame(checkAudioLevel);
-      }
-    };
-    
-    checkAudioLevel();
-  };
+
 
   const toggleMic = async () => {
     if (!isMicOn && !isListening) {
@@ -2106,20 +2087,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   )}
                 </div>
                 
-                {/* 음성 레벨 바 */}
-                {isListening && (
-                  <div className="mb-2">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-gray-400">음성 레벨:</span>
-                      <div className="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-green-500 to-yellow-500 transition-all duration-100"
-                          style={{ width: `${Math.min(audioLevel / 128 * 100, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
+
                 
                 {/* 임시 텍스트 표시 */}
                 {interimTranscript && (
