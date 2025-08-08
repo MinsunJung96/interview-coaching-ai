@@ -2494,7 +2494,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                <div className="mt-6 p-4 rounded-lg" style={{backgroundColor: 'rgba(255, 204, 0, 0.2)'}}>
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
                       <Image
@@ -2506,7 +2506,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <h4 className="text-yellow-800 font-bold mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
                       <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 전공 적합성을 뒷받침하는 추가 경험(인턴십, 개인 연구, 해외 디자인 사례 분석 등) 제시</li>
                         <li>• 산업디자인과 커리큘럼 중 특정 과목·연구실과의 연계성을 구체적으로 언급</li>
@@ -2558,7 +2558,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                <div className="mt-6 p-4 rounded-lg" style={{backgroundColor: 'rgba(255, 204, 0, 0.2)'}}>
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
                       <Image
@@ -2570,7 +2570,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <h4 className="text-yellow-800 font-bold mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
                       <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 학업 역량을 보여줄 구체적 성취 지표(공모전 수상, 성적, 논문·보고서) 포함</li>
                         <li>• 디자인 외의 수학·물리·컴퓨터 관련 학습 경험을 강조해 융합형 인재 이미지 강화</li>
@@ -2622,7 +2622,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                <div className="mt-6 p-4 rounded-lg" style={{backgroundColor: 'rgba(255, 204, 0, 0.2)'}}>
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
                       <Image
@@ -2634,7 +2634,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <h4 className="text-yellow-800 font-bold mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
                       <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 협업 과정에서의 갈등 상황과 이를 해결한 경험을 포함해 리더십과 조율 능력 강조</li>
                         <li>• 봉사활동, 대외활동 등 사회적 책임감을 보여주는 사례 추가로 인성 평가 가점 확보</li>
@@ -2686,7 +2686,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+                <div className="mt-6 p-4 rounded-lg" style={{backgroundColor: 'rgba(255, 204, 0, 0.2)'}}>
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
                       <Image
@@ -2698,7 +2698,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <h4 className="text-yellow-800 font-bold mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
                       <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• KAIST 졸업 이후의 구체적 진로 계획(산업 현장 진출, 연구원, 창업 등) 제시</li>
                         <li>• 미래 산업 트렌드와 연계해 본인의 비전을 설명하여 차별성 부각</li>
