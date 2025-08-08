@@ -1817,7 +1817,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             
             {/* Teachers Image (Foreground) - Fixed to bottom */}
             <div className={`absolute bottom-0 left-0 right-0 w-full z-10 transition-all duration-1000 ease-out ${
-              isTeachersVisible ? 'opacity-100' : 'opacity-0'
+              isTeachersVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
               <Image
                 src="/teachers.png"
