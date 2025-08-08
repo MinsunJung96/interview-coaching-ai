@@ -1807,6 +1807,15 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
+            
+            {/* 숨겨진 분석 리포트 버튼 */}
+            <button 
+              className="w-8 h-8 opacity-0 hover:opacity-10 transition-opacity"
+              onClick={() => setStep(6)}
+              title="분석 리포트로 이동"
+            >
+              📊
+            </button>
           </div>
 
           {/* Main Content */}
