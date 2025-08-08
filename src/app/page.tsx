@@ -280,9 +280,7 @@ export default function Home() {
       });
       
       // Teachers image fade-in animation (start immediately)
-      setTimeout(() => {
-        setIsTeachersVisible(true);
-      }, 200); // Start after 200ms for smoother entry
+      setIsTeachersVisible(true);
       
       // Individual digit animations with different speeds and overshoot
       const updateInterval = 30; // Update every 30ms for smoother animation
