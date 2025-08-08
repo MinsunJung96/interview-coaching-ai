@@ -2059,43 +2059,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
                 </div>
                 
-                {/* 상태 메시지 */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    {/* 상태 아이콘 */}
-                    <div className="relative">
-                      {interviewStatus === 'listening' && (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-green-400 text-sm font-medium">듣고 있습니다</span>
-                        </div>
-                      )}
-                      {interviewStatus === 'processing' && (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
-                          <span className="text-yellow-400 text-sm font-medium">처리 중</span>
-                        </div>
-                      )}
-                      {interviewStatus === 'speaking' && (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-                          <span className="text-blue-400 text-sm font-medium">면접관이 말하고 있습니다</span>
-                        </div>
-                      )}
-                      {interviewStatus === 'user_turn' && (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
-                          <span className="text-purple-400 text-sm font-medium">당신의 차례입니다</span>
-                        </div>
-                      )}
-                      {interviewStatus === 'waiting' && (
-                        <div className="flex items-center space-x-2">
-                          <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                          <span className="text-gray-400 text-sm font-medium">준비 중</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                {/* 타이머 영역 */}
+                <div className="flex items-center justify-end mb-3">
                   
                   {/* 타이머 */}
                   <div className={`px-3 py-1 rounded-lg text-sm font-mono font-bold ${
