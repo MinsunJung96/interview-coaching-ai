@@ -142,6 +142,7 @@ export default function Home() {
   // Animation states for Step 0
   const [countNumber, setCountNumber] = useState(0);
   const [activeListItems, setActiveListItems] = useState<number[]>([]);
+  const [isTeachersVisible, setIsTeachersVisible] = useState(false);
   const [digitAnimations, setDigitAnimations] = useState({
     thousands: 0,
     hundreds: 0,
@@ -270,12 +271,18 @@ export default function Home() {
       // Reset animation states
       setCountNumber(0);
       setActiveListItems([]);
+      setIsTeachersVisible(false);
       setDigitAnimations({
         thousands: 0,
         hundreds: 0,
         tens: 0,
         ones: 0
       });
+      
+      // Teachers image fade-in animation (start immediately)
+      setTimeout(() => {
+        setIsTeachersVisible(true);
+      }, 200); // Start after 200ms for smoother entry
       
       // Individual digit animations with different speeds and overshoot
       const updateInterval = 30; // Update every 30ms for smoother animation
@@ -1811,7 +1818,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
             
             {/* Teachers Image (Foreground) - Fixed to bottom */}
-            <div className="absolute bottom-0 left-0 right-0 w-full z-10">
+            <div className={`absolute bottom-0 left-0 right-0 w-full z-10 transition-all duration-1000 ease-out ${
+              isTeachersVisible ? 'opacity-100' : 'opacity-0'
+            }`}>
               <Image
                 src="/teachers.png"
                 alt="선생님들"
