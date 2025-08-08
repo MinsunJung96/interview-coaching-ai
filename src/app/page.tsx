@@ -283,65 +283,73 @@ export default function Home() {
         ones: 0
       });
       
-      // Teachers image fade-in animation (start immediately)
-      setIsTeachersVisible(true);
-      
-      // Individual digit animations with different speeds and overshoot
-      const updateInterval = 30; // Update every 30ms for smoother animation
-      
-      // Target digits for 3,780
-      const targets = {
-        thousands: 3,
-        hundreds: 7,
-        tens: 8,
-        ones: 0
-      };
-      
-      // Different durations for each digit (faster - complete in 1 second)
-      const durations = {
-        thousands: 200,  // 0.2 seconds
-        hundreds: 400,   // 0.4 seconds
-        tens: 700,       // 0.7 seconds
-        ones: 1000       // 1 second
-      };
-      
-      let startTime = Date.now();
-      
-      const digitInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
+      // Start animations after a small delay to ensure proper hydration
+      const startAnimations = () => {
+        // Teachers image fade-in animation (start immediately)
+        setIsTeachersVisible(true);
         
-        setDigitAnimations({
-          thousands: getDigitValue(elapsed, durations.thousands, targets.thousands),
-          hundreds: getDigitValue(elapsed, durations.hundreds, targets.hundreds),
-          tens: getDigitValue(elapsed, durations.tens, targets.tens),
-          ones: getDigitValue(elapsed, durations.ones, targets.ones)
-        });
+        // Individual digit animations with different speeds and overshoot
+        const updateInterval = 30; // Update every 30ms for smoother animation
         
-        // Clear when all animations are complete
-        if (elapsed >= Math.max(...Object.values(durations)) + 300) {
-          setDigitAnimations(targets);
-          clearInterval(digitInterval);
-        }
-      }, updateInterval);
-      
-      // List items activation (start after 1 second delay)
-      setTimeout(() => {
-        // Activate first item
-        setActiveListItems([0]);
+        // Target digits for 3,780
+        const targets = {
+          thousands: 3,
+          hundreds: 7,
+          tens: 8,
+          ones: 0
+        };
         
-        // Activate second item after 1000ms
-        setTimeout(() => {
-          setActiveListItems([0, 1]);
+        // Different durations for each digit (faster - complete in 1 second)
+        const durations = {
+          thousands: 200,  // 0.2 seconds
+          hundreds: 400,   // 0.4 seconds
+          tens: 700,       // 0.7 seconds
+          ones: 1000       // 1 second
+        };
+        
+        let startTime = Date.now();
+        
+        const digitInterval = setInterval(() => {
+          const elapsed = Date.now() - startTime;
           
-          // Activate third item after another 1000ms
+          setDigitAnimations({
+            thousands: getDigitValue(elapsed, durations.thousands, targets.thousands),
+            hundreds: getDigitValue(elapsed, durations.hundreds, targets.hundreds),
+            tens: getDigitValue(elapsed, durations.tens, targets.tens),
+            ones: getDigitValue(elapsed, durations.ones, targets.ones)
+          });
+          
+          // Clear when all animations are complete
+          if (elapsed >= Math.max(...Object.values(durations)) + 300) {
+            setDigitAnimations(targets);
+            clearInterval(digitInterval);
+          }
+        }, updateInterval);
+        
+        // List items activation (start after 1 second delay)
+        setTimeout(() => {
+          // Activate first item
+          setActiveListItems([0]);
+          
+          // Activate second item after 1000ms
           setTimeout(() => {
-            setActiveListItems([0, 1, 2]);
+            setActiveListItems([0, 1]);
+            
+            // Activate third item after another 1000ms
+            setTimeout(() => {
+              setActiveListItems([0, 1, 2]);
+            }, 1000);
           }, 1000);
-        }, 1000);
-      }, 1000);
+        }, 500); // Start 0.5 seconds after count-up completion (1000ms + 500ms)
+        
+        return digitInterval;
+      };
+      
+      // Start animations after hydration delay
+      const animationTimeout = setTimeout(startAnimations, 100);
       
       return () => {
-        clearInterval(digitInterval);
+        clearTimeout(animationTimeout);
       };
     }
   }, [step]);
