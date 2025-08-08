@@ -1635,7 +1635,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Header */}
       {step !== 0 && step !== 6 && (
-        <div className={`flex items-center justify-between p-4 ${step === 4 ? 'relative z-30' : ''}`}>
+        <div className={`flex items-center justify-between p-4 ${(step === 3 || step === 4) ? 'relative z-30' : ''}`}>
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
           onClick={() => {
@@ -1992,13 +1992,16 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {/* Step 3: Waiting Room */}
       {step === 3 && (
         <div key="step-3" className="flex-1 flex flex-col relative animate-slideInRight">
-          {/* Background Image */}
+          {/* Full-screen Background Image */}
           <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="fixed inset-0 bg-cover bg-center z-0"
             style={{
               backgroundImage: "linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('/interview-door-image.png')"
             }}
           ></div>
+
+          {/* Header Gradient Overlay */}
+          <div className="fixed top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
 
           {/* Content */}
           <div className="relative z-10 w-full pt-8 px-6">
