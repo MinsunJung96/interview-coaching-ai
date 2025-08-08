@@ -2462,30 +2462,52 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">학과 특성에 대한 정확한 이해도</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">공모전 및 프로젝트 경험</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">실제 문제 해결 경험과 적용 능력</span>
                   </div>
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <Image
+                        src="/Icon_Warning_Fill.svg"
+                        alt="경고"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-500 font-medium mb-2">보완 권장 사항</h4>
-                      <ul className="text-gray-300 text-sm space-y-1 leading-relaxed">
+                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 전공 적합성을 뒷받침하는 추가 경험(인턴십, 개인 연구, 해외 디자인 사례 분석 등) 제시</li>
                         <li>• 산업디자인과 커리큘럼 중 특정 과목·연구실과의 연계성을 구체적으로 언급</li>
                       </ul>
@@ -2504,30 +2526,52 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">구체적이고 명확한 학업 목표</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">인지 심리학 기반 실험 경험</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">구조적 설계와 기능적 완성도 고려</span>
                   </div>
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <Image
+                        src="/Icon_Warning_Fill.svg"
+                        alt="경고"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-500 font-medium mb-2">보완 권장 사항</h4>
-                      <ul className="text-gray-300 text-sm space-y-1 leading-relaxed">
+                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 학업 역량을 보여줄 구체적 성취 지표(공모전 수상, 성적, 논문·보고서) 포함</li>
                         <li>• 디자인 외의 수학·물리·컴퓨터 관련 학습 경험을 강조해 융합형 인재 이미지 강화</li>
                       </ul>
@@ -2546,30 +2590,52 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">뛰어난 협업과 의사소통 역량</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">능동적이고 주도적인 문제 해결 태도</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">겸손하고 성실한 학업 자세</span>
                   </div>
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <Image
+                        src="/Icon_Warning_Fill.svg"
+                        alt="경고"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-500 font-medium mb-2">보완 권장 사항</h4>
-                      <ul className="text-gray-300 text-sm space-y-1 leading-relaxed">
+                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• 협업 과정에서의 갈등 상황과 이를 해결한 경험을 포함해 리더십과 조율 능력 강조</li>
                         <li>• 봉사활동, 대외활동 등 사회적 책임감을 보여주는 사례 추가로 인성 평가 가점 확보</li>
                       </ul>
@@ -2588,30 +2654,52 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">구체적인 장기적 학업 계획</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">융합 역량 발전을 통한 사회 기여 의지</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-green-400 mt-1">✓</span>
+                    <Image
+                      src="/Icon_Check-circle_Fill.svg"
+                      alt="체크"
+                      width={16}
+                      height={16}
+                      className="mt-1 flex-shrink-0"
+                    />
                     <span className="text-gray-300">디자인적 사고의 일상적 적용 능력</span>
                   </div>
                 </div>
                 
                 {/* 보완 필요 사항 */}
-                <div className="mt-6 p-4 bg-yellow-900/20 border border-yellow-600/30 rounded-lg">
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-0.5">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+                      <Image
+                        src="/Icon_Warning_Fill.svg"
+                        alt="경고"
+                        width={20}
+                        height={20}
+                        className="object-contain"
+                      />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-yellow-500 font-medium mb-2">보완 권장 사항</h4>
-                      <ul className="text-gray-300 text-sm space-y-1 leading-relaxed">
+                      <h4 className="text-yellow-800 font-medium mb-2">아래 내용을 좀 더 발전시켜 보세요</h4>
+                      <ul className="text-yellow-700 text-sm space-y-1 leading-relaxed">
                         <li>• KAIST 졸업 이후의 구체적 진로 계획(산업 현장 진출, 연구원, 창업 등) 제시</li>
                         <li>• 미래 산업 트렌드와 연계해 본인의 비전을 설명하여 차별성 부각</li>
                       </ul>
