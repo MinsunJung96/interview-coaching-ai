@@ -2303,80 +2303,181 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {step === 6 && (
         <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
-          {/* Page Title */}
-          <div className="px-6 pt-6 pb-4">
-            <h1 className="text-[28px] font-bold text-white text-left">면접 분석 리포트</h1>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+            <button 
+              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
+              className="p-2 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            <h1 className="text-[20px] font-bold text-white">면접 분석 리포트</h1>
+            
+            <button className="p-2 text-white hover:text-gray-300 transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 9L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 13L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             
             {/* 평가 항목별 점수 테이블 */}
             <div className="mb-8">
-              <div className="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700">
+              <div className="rounded-2xl overflow-hidden border border-[#3D3D3D]">
                 {/* Table Header */}
-                <div className="grid grid-cols-3 bg-gray-700 text-gray-300 text-base font-medium py-4">
+                <div className="grid grid-cols-3 bg-[#000000] text-white text-base font-medium py-4">
                   <div className="px-6 text-left">평가 항목</div>
                   <div className="px-6 text-center">배점</div>
                   <div className="px-6 text-center">점수</div>
                 </div>
                 
                 {/* Table Rows */}
-                <div className="bg-gray-800">
-                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                <div className="divide-y divide-[#3D3D3D]">
+                  <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">전공 적합성</div>
                     <div className="px-6 text-center text-white">30</div>
-                    <div className="px-6 text-center text-blue-400 font-bold text-xl">26</div>
+                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">26</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                  <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">학업 역량</div>
                     <div className="px-6 text-center text-white">30</div>
-                    <div className="px-6 text-center text-blue-400 font-bold text-xl">24</div>
+                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">28</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                  <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">인성, 태도</div>
                     <div className="px-6 text-center text-white">20</div>
-                    <div className="px-6 text-center text-blue-400 font-bold text-xl">18</div>
+                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">18</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center py-4">
+                  <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">발전 가능성</div>
                     <div className="px-6 text-center text-white">20</div>
-                    <div className="px-6 text-center text-red-400 font-bold text-xl">13</div>
+                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">15</div>
                   </div>
+                </div>
+              </div>
+              
+              {/* 총점 */}
+              <div className="mt-4 bg-[#121212] border border-[#3D3D3D] rounded-xl p-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-bold text-lg">총점</span>
+                  <span className="text-[#ff5500] font-bold text-2xl">87/100</span>
                 </div>
               </div>
             </div>
 
             {/* 전공 적합성 섹션 */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-white">전공 적합성</h2>
-              <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                <p className="text-gray-300 leading-relaxed text-base">
-                  Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl.
+              <h2 className="text-xl font-bold mb-4 text-white">전공 적합성</h2>
+              <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
+                <p className="text-gray-300 leading-relaxed text-base mb-4">
+                  카이스트 산업디자인학과에 대한 이해도가 높았습니다. 특히 디자인 씽킹 프로세스와 사용자 중심 디자인에 대한 본인만의 관점을 잘 제시했습니다.
                 </p>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">디자인 포트폴리오에 대한 구체적인 설명</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">산업디자인 트렌드에 대한 인사이트</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-yellow-400 mt-1">△</span>
+                    <span className="text-gray-300">기술과 디자인의 융합에 대한 이해 보완 필요</span>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* 전공 적합성 섹션 (두 번째) */}
+            {/* 학업 역량 섹션 */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-4 text-white">전공 적합성</h2>
-              <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                <p className="text-gray-300 leading-relaxed text-base">
-                  Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl. Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl. Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque.
+              <h2 className="text-xl font-bold mb-4 text-white">학업 역량</h2>
+              <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
+                <p className="text-gray-300 leading-relaxed text-base mb-4">
+                  창의적 문제 해결 능력과 논리적 사고력이 뛰어났습니다. 특히 디자인 프로젝트 경험을 통해 배운 점들을 체계적으로 설명했습니다.
                 </p>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">체계적인 프로젝트 수행 경험</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">협업 및 리더십 경험</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">자기주도적 학습 능력</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 인성, 태도 섹션 */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold mb-4 text-white">인성, 태도</h2>
+              <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
+                <p className="text-gray-300 leading-relaxed text-base mb-4">
+                  진정성 있는 답변과 겸손한 태도가 인상적이었습니다. 실패 경험에서 배운 점을 솔직하게 공유하는 모습이 좋았습니다.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">진솔한 소통 능력</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">성장 마인드셋</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-yellow-400 mt-1">△</span>
+                    <span className="text-gray-300">보다 자신감 있는 표현력 향상 필요</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 발전 가능성 섹션 */}
+            <div className="mb-8">
+              <h2 className="text-xl font-bold mb-4 text-white">발전 가능성</h2>
+              <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
+                <p className="text-gray-300 leading-relaxed text-base mb-4">
+                  미래 비전은 명확하나, 구체적인 실행 계획과 목표 설정에서 보완이 필요합니다. 장기적 관점에서의 커리어 로드맵을 더 구체화해보세요.
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-start space-x-2">
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">명확한 비전 제시</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-yellow-400 mt-1">△</span>
+                    <span className="text-gray-300">구체적인 실행 계획 보완 필요</span>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                    <span className="text-red-400 mt-1">✗</span>
+                    <span className="text-gray-300">산업 트렌드 분석력 향상 필요</span>
+                  </div>
+                </div>
               </div>
             </div>
 
           </div>
 
           {/* Action Buttons - Fixed at bottom */}
-          <div className="px-6 pb-6 space-y-3">
+          <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
               onClick={() => setStep(0)} // 메인으로 돌아가기
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
+              className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               다시 면접 보기
             </button>
@@ -2384,7 +2485,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               onClick={() => {
                 alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
               }}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
+              className="w-full bg-gray-700 hover:bg-gray-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               무제한 면접 AI 코칭
             </button>
