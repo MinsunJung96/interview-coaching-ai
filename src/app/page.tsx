@@ -2461,20 +2461,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               <h2 className="text-xl font-bold mb-4 text-white">전공 적합성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
-                  카이스트 산업디자인학과에 대한 이해도가 높았습니다. 특히 디자인 씽킹 프로세스와 사용자 중심 디자인에 대한 본인만의 관점을 잘 제시했습니다.
+                  지원자가 디자인과 공학 융합이라는 학과 특성을 정확히 이해하고 있습니다. '스마트 라이프' 공모전 경험과 사용자 경험(UX), 인터랙션 디자인에 대한 구체적인 관심사를 제시하였으며, 전동카트 조작판 개선 사례를 통해 전공 관련 문제 해결 경험과 적용 능력을 입증했습니다.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">디자인 포트폴리오에 대한 구체적인 설명</span>
+                    <span className="text-gray-300">학과 특성에 대한 정확한 이해도</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">산업디자인 트렌드에 대한 인사이트</span>
+                    <span className="text-gray-300">공모전 및 프로젝트 경험</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-yellow-400 mt-1">△</span>
-                    <span className="text-gray-300">기술과 디자인의 융합에 대한 이해 보완 필요</span>
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">실제 문제 해결 경험과 적용 능력</span>
                   </div>
                 </div>
               </div>
@@ -2485,20 +2485,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               <h2 className="text-xl font-bold mb-4 text-white">학업 역량</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
-                  창의적 문제 해결 능력과 논리적 사고력이 뛰어났습니다. 특히 디자인 프로젝트 경험을 통해 배운 점들을 체계적으로 설명했습니다.
+                  사용자 연구 기반 실험 설계를 학습하고자 하는 구체적인 학업 목표가 명확합니다. 색상·버튼 크기·배열 등 인지 심리학 요소를 실험에 적용한 경험을 보유하며, 문제 해결 과정에서 구조적 설계와 기능적 완성도를 고려한 제품 아이디어를 제안했습니다.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">체계적인 프로젝트 수행 경험</span>
+                    <span className="text-gray-300">구체적이고 명확한 학업 목표</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">협업 및 리더십 경험</span>
+                    <span className="text-gray-300">인지 심리학 기반 실험 경험</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">자기주도적 학습 능력</span>
+                    <span className="text-gray-300">구조적 설계와 기능적 완성도 고려</span>
                   </div>
                 </div>
               </div>
@@ -2509,20 +2509,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               <h2 className="text-xl font-bold mb-4 text-white">인성, 태도</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
-                  진정성 있는 답변과 겸손한 태도가 인상적이었습니다. 실패 경험에서 배운 점을 솔직하게 공유하는 모습이 좋았습니다.
+                  팀 프로젝트 경험을 통해 협업과 의사소통 역량을 보여주었습니다. 실생활 문제를 능동적으로 관찰하고 해결하려는 주도적 태도가 드러나며, KAIST에 기여하고자 하는 겸손하고 성실한 자세를 표현했습니다.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">진솔한 소통 능력</span>
+                    <span className="text-gray-300">뛰어난 협업과 의사소통 역량</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">성장 마인드셋</span>
+                    <span className="text-gray-300">능동적이고 주도적인 문제 해결 태도</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-yellow-400 mt-1">△</span>
-                    <span className="text-gray-300">보다 자신감 있는 표현력 향상 필요</span>
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">겸손하고 성실한 학업 자세</span>
                   </div>
                 </div>
               </div>
@@ -2533,20 +2533,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               <h2 className="text-xl font-bold mb-4 text-white">발전 가능성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
-                  미래 비전은 명확하나, 구체적인 실행 계획과 목표 설정에서 보완이 필요합니다. 장기적 관점에서의 커리어 로드맵을 더 구체화해보세요.
+                  사용자 행동과 감성을 연구하고 이를 심화하려는 장기적 학업 계획이 구체적입니다. 공학과 디자인의 융합 역량을 발전시켜 사회에 기여하겠다는 명확한 방향성을 제시하였으며, 작은 문제도 디자인적 관점에서 접근하는 습관이 장기적인 성장 가능성을 높입니다.
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-start space-x-2">
                     <span className="text-green-400 mt-1">✓</span>
-                    <span className="text-gray-300">명확한 비전 제시</span>
+                    <span className="text-gray-300">구체적인 장기적 학업 계획</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-yellow-400 mt-1">△</span>
-                    <span className="text-gray-300">구체적인 실행 계획 보완 필요</span>
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">융합 역량 발전을 통한 사회 기여 의지</span>
                   </div>
                   <div className="flex items-start space-x-2">
-                    <span className="text-red-400 mt-1">✗</span>
-                    <span className="text-gray-300">산업 트렌드 분석력 향상 필요</span>
+                    <span className="text-green-400 mt-1">✓</span>
+                    <span className="text-gray-300">디자인적 사고의 일상적 적용 능력</span>
                   </div>
                 </div>
               </div>
