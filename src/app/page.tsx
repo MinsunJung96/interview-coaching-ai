@@ -134,7 +134,7 @@ interface University {
 }
 
 export default function Home() {
-  const isClient = useClientOnly();
+  // const isClient = useClientOnly();
   const [step, setStep] = useState(0);
 
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
@@ -1594,14 +1594,15 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step]); // hasAskedFirstQuestion 의존성 제거
 
-  // 클라이언트에서만 렌더링 (Hydration 에러 방지)
-  if (!isClient) {
-    return (
-      <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center">
-        <div className="text-xl">로딩 중...</div>
-      </div>
-    );
-  }
+  // 클라이언트에서만 렌더링 (Hydration 에러 방지) - 임시 비활성화
+  // if (!isClient) {
+  //   return (
+  //     <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center">
+  //       <div className="text-xl">로딩 중...</div>
+  //       <div className="text-sm mt-2 text-gray-400">isClient: {isClient.toString()}</div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col">
@@ -1828,7 +1829,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               onClick={() => changeStepWithTransition(1, 'forward')}
               className="w-full h-12 rounded-lg text-base font-medium bg-[#ff5500] text-white hover:bg-[#e64a00] transition-all duration-200 ease-in-out active:scale-95"
             >
-              시작하기
+              면접볼 대학 선택하기
             </button>
           </div>
         </div>
