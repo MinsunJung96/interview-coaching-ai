@@ -2165,28 +2165,32 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   {/* 음성 레벨 표시 원 (마이크 ON 상태일 때만) */}
                   {isMicOn && !isInterviewerSpeaking && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      {/* 외부 원 - 음성 레벨에 따라 크기 변화 */}
+                      {/* 외부 원 - 더 큰 반응성과 펄스 효과 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 opacity-20 transition-all duration-150 ease-out"
+                        className="absolute rounded-full bg-red-500 transition-all duration-200 ease-out animate-pulse"
                         style={{
-                          width: `${Math.max(80, 80 + (audioLevel * 2))}px`,
-                          height: `${Math.max(80, 80 + (audioLevel * 2))}px`,
+                          width: `${Math.max(90, 90 + (audioLevel * 3))}px`,
+                          height: `${Math.max(90, 90 + (audioLevel * 3))}px`,
+                          opacity: Math.min(0.15 + (audioLevel / 255) * 0.25, 0.4),
                         }}
                       />
-                      {/* 중간 원 */}
+                      {/* 중간 원 - 펄스와 크기 변화 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 opacity-30 transition-all duration-100 ease-out"
+                        className="absolute rounded-full bg-red-500 transition-all duration-150 ease-out"
                         style={{
-                          width: `${Math.max(80, 80 + (audioLevel * 1.5))}px`,
-                          height: `${Math.max(80, 80 + (audioLevel * 1.5))}px`,
+                          width: `${Math.max(85, 85 + (audioLevel * 2))}px`,
+                          height: `${Math.max(85, 85 + (audioLevel * 2))}px`,
+                          opacity: Math.min(0.2 + (audioLevel / 255) * 0.3, 0.5),
+                          transform: `scale(${1 + (audioLevel / 255) * 0.3})`,
                         }}
                       />
-                      {/* 내부 원 */}
+                      {/* 내부 원 - 기본 활성화 상태 표시 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 opacity-40 transition-all duration-75 ease-out"
+                        className="absolute rounded-full bg-red-500 transition-all duration-100 ease-out"
                         style={{
-                          width: `${Math.max(80, 80 + audioLevel)}px`,
-                          height: `${Math.max(80, 80 + audioLevel)}px`,
+                          width: `${Math.max(80, 80 + (audioLevel * 1.2))}px`,
+                          height: `${Math.max(80, 80 + (audioLevel * 1.2))}px`,
+                          opacity: Math.min(0.3 + (audioLevel / 255) * 0.2, 0.5),
                         }}
                       />
                     </div>
