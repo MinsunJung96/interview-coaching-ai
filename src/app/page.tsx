@@ -1803,25 +1803,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       {getPhaseGuideline(getInterviewPhase(interviewTime)).name}
                     </span>
                   </div>
-                  <div className="flex space-x-1">
-                    {['intro', 'major', 'personality', 'social', 'university'].map((phase) => (
-                      <div
-                        key={phase}
-                        className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                          getInterviewPhase(interviewTime) === phase
-                            ? 'bg-white w-8'
-                            : interviewTime < (
-                                phase === 'intro' ? 480 :
-                                phase === 'major' ? 360 :
-                                phase === 'personality' ? 240 :
-                                phase === 'social' ? 120 : 0
-                              )
-                            ? 'bg-gray-600'
-                            : 'bg-gray-400'
-                        }`}
-                      />
-                    ))}
-                  </div>
+
                 </div>
                 
                 {/* 상태 메시지 */}

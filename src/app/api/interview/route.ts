@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4-turbo-preview', // GPT-4로 업그레이드 (더 나은 맥락 이해)
+        model: 'gpt-4', // GPT-4로 업그레이드 (더 나은 맥락 이해)
         messages: [
           {
             role: 'system',
