@@ -2429,34 +2429,26 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">전공 적합성</div>
                     <div className="px-6 text-center text-white">30</div>
-                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">26</div>
+                    <div className="px-6 text-center text-blue-500 font-bold text-xl">26</div>
                   </div>
                   
                   <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">학업 역량</div>
                     <div className="px-6 text-center text-white">30</div>
-                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">28</div>
+                    <div className="px-6 text-center text-blue-500 font-bold text-xl">28</div>
                   </div>
                   
                   <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">인성, 태도</div>
                     <div className="px-6 text-center text-white">20</div>
-                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">18</div>
+                    <div className="px-6 text-center text-blue-500 font-bold text-xl">18</div>
                   </div>
                   
                   <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
                     <div className="px-6 text-white font-medium">발전 가능성</div>
                     <div className="px-6 text-center text-white">20</div>
-                    <div className="px-6 text-center text-[#ff5500] font-bold text-xl">15</div>
+                    <div className="px-6 text-center text-red-500 font-bold text-xl">15</div>
                   </div>
-                </div>
-              </div>
-              
-              {/* 총점 */}
-              <div className="mt-4 bg-[#121212] border border-[#3D3D3D] rounded-xl p-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-bold text-lg">총점</span>
-                  <span className="text-[#ff5500] font-bold text-2xl">87/100</span>
                 </div>
               </div>
             </div>
