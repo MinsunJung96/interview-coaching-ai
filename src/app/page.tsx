@@ -2714,18 +2714,18 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Action Buttons - Fixed at bottom */}
           <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
-              onClick={() => setStep(0)} // 메인으로 돌아가기
-              className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
-            >
-              다시 면접 보기
-            </button>
-            <button
               onClick={() => {
                 alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
               }}
+              className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
+            >
+              무제한 면접 코칭과 분석
+            </button>
+            <button
+              onClick={() => setStep(0)} // 메인으로 돌아가기
               className="w-full bg-gray-700 hover:bg-gray-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
-              무제한 면접 AI 코칭
+              면접 다시 보기
             </button>
           </div>
         </div>
