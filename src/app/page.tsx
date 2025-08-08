@@ -1617,7 +1617,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Header */}
       {step !== 0 && step !== 6 && (
-        <div className={`flex items-center justify-between p-4 ${step === 4 ? 'absolute top-0 left-0 right-0 z-30' : ''}`}>
+        <div className={`flex items-center justify-between p-4 ${step === 4 ? 'relative z-30' : ''}`}>
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
           onClick={() => {
@@ -2035,29 +2035,30 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div key="step-4" className="fixed inset-0 flex flex-col relative animate-slideInRight">
-          {/* Main Interview Video Area - Full Screen */}
-          <div className="absolute inset-0">
-            {/* Interviewer Video Background */}
-            <div className="w-full h-full flex items-center justify-center relative z-0">
-              <video
-                key={currentInterviewerVideo}
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-                style={{ minHeight: "100vh" }}
-                onError={(e) => console.error('비디오 로드 에러:', e)}
-                onLoadedData={() => console.log('비디오 로드됨:', currentInterviewerVideo)}
-              >
-                <source src={`/${currentInterviewerVideo}.mp4`} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-            
-            {/* Header Gradient Overlay for Readability */}
-            <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
+        <div key="step-4" className="flex-1 flex flex-col relative animate-slideInRight">
+          {/* Full Screen Video Background */}
+          <div className="fixed inset-0 z-0">
+            <video
+              key={currentInterviewerVideo}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+              style={{ minHeight: "100vh" }}
+              onError={(e) => console.error('비디오 로드 에러:', e)}
+              onLoadedData={() => console.log('비디오 로드됨:', currentInterviewerVideo)}
+            >
+              <source src={`/${currentInterviewerVideo}.mp4`} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+          
+          {/* Header Gradient Overlay for Readability */}
+          <div className="fixed top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
+          
+          {/* Main Interview Content Area */}
+          <div className="flex-1 relative z-10">
             
             {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
