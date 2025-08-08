@@ -2474,7 +2474,12 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           <div className="flex-1 overflow-y-auto px-6 py-6">
             
             {/* 페이지 타이틀 */}
-            <h1 className="text-[32px] font-bold text-white mb-8">면접 분석 리포트</h1>
+            <div className="flex items-center gap-3 mb-8">
+              <h1 className="text-[32px] font-bold text-white">면접 분석 리포트</h1>
+              <span className="bg-[#ff5500] text-white text-sm font-medium px-3 py-1 rounded-full">
+                Sample
+              </span>
+            </div>
             
             {/* 평가 항목별 점수 테이블 */}
             <div id="score-table" className="mb-8">
