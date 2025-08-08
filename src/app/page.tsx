@@ -2037,13 +2037,47 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
               <div className="bg-black/70 backdrop-blur-sm rounded-xl p-4 shadow-lg">
-                {/* 면접 단계와 타이머를 같은 줄에 배치 */}
+                {/* 면접 단계, 상태, 타이머를 같은 줄에 배치 */}
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-gray-400">현재 단계:</span>
-                    <span className="text-sm font-medium text-white bg-white/20 px-2 py-1 rounded">
-                      {getPhaseGuideline(getInterviewPhase(interviewTime)).name}
-                    </span>
+                  <div className="flex items-center space-x-4">
+                    {/* 현재 단계 */}
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-gray-400">현재 단계:</span>
+                      <span className="text-sm font-medium text-white bg-white/20 px-2 py-1 rounded">
+                        {getPhaseGuideline(getInterviewPhase(interviewTime)).name}
+                      </span>
+                    </div>
+                    
+                    {/* 면접관 상태 표시 (배경 제거) */}
+                    {isInterviewerSpeaking ? (
+                      <div className="flex items-center space-x-2 text-blue-400">
+                        <div className="flex space-x-1">
+                          <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse"></div>
+                          <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                          <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                        </div>
+                        <span className="text-sm">면접관이 말하는 중</span>
+                      </div>
+                    ) : interviewStatus === 'user_turn' ? (
+                      <div className="flex items-center space-x-2 text-green-400">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-sm">답변해 주세요</span>
+                      </div>
+                    ) : isListening ? (
+                      <div className="flex items-center space-x-2 text-purple-400">
+                        <div className="flex space-x-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                        <span className="text-sm">듣는 중</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2 text-gray-400">
+                        <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                        <span className="text-sm">대기 중</span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* 타이머 */}
@@ -2052,39 +2086,6 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   }`}>
                     {formatTime(interviewTime)}
                   </div>
-                </div>
-                
-                {/* 면접관 상태 표시 */}
-                <div className="flex items-center justify-center mb-2">
-                  {isInterviewerSpeaking ? (
-                    <div className="flex items-center space-x-2 bg-blue-900/30 text-blue-400 rounded-lg px-3 py-2">
-                      <div className="flex space-x-1">
-                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse"></div>
-                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                        <div className="w-1 h-4 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                      </div>
-                      <span className="text-sm">면접관이 말하는 중</span>
-                    </div>
-                  ) : interviewStatus === 'user_turn' ? (
-                    <div className="flex items-center space-x-2 bg-green-900/30 text-green-400 rounded-lg px-3 py-2">
-                      <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                      <span className="text-sm">답변해 주세요</span>
-                    </div>
-                  ) : isListening ? (
-                    <div className="flex items-center space-x-2 bg-purple-900/30 text-purple-400 rounded-lg px-3 py-2">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                        <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                      </div>
-                      <span className="text-sm">듣는 중</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center space-x-2 bg-gray-900/30 text-gray-400 rounded-lg px-3 py-2">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <span className="text-sm">대기 중</span>
-                    </div>
-                  )}
                 </div>
                 
 
