@@ -183,6 +183,9 @@ export default function Home() {
   const [showReportBanner, setShowReportBanner] = useState(false);
   const [showSampleModal, setShowSampleModal] = useState(false);
   const [lastTransitionTime, setLastTransitionTime] = useState<number>(600);
+  
+  // 스크롤 기반 강조 효과를 위한 상태
+  const [highlightedItems, setHighlightedItems] = useState<string[]>([]);
 
   // 시간 기반 면접 단계 결정 함수
   const getInterviewPhase = (timeRemaining: number): 'intro' | 'major' | 'personality' | 'social' | 'university' => {
@@ -1651,6 +1654,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     if (step === 6) {
       // 모달 상태 초기화
       setShowSampleModal(false);
+      setHighlightedItems([]); // 강조 상태 초기화
       
       // 1초 후 모달 표시
       const timer = setTimeout(() => {
@@ -1658,6 +1662,55 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       }, 1000);
       
       return () => clearTimeout(timer);
+    }
+  }, [step]);
+
+  // 스크롤 기반 강조 효과
+  useEffect(() => {
+    if (step !== 6) return;
+
+    const handleScroll = () => {
+      const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+      if (!scrollContainer) return;
+
+      const containerRect = scrollContainer.getBoundingClientRect();
+      const centerY = containerRect.top + containerRect.height / 2;
+
+      // 강조할 요소들의 ID 리스트 (순서대로 강조됨)
+      const targetIds = [
+        'score-table',
+        'major-fit',
+        'academic-capability', 
+        'personality-attitude',
+        'growth-potential'
+      ];
+
+      let newHighlighted: string[] = [];
+
+      targetIds.forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          const elementTop = rect.top;
+          
+          // 요소의 상단이 화면 중간 근처에 왔을 때 강조
+          if (elementTop <= centerY && elementTop >= centerY - 100) {
+            // 현재 요소와 이전 요소들 모두 강조
+            const currentIndex = targetIds.indexOf(id);
+            newHighlighted = targetIds.slice(0, currentIndex + 1);
+          }
+        }
+      });
+
+      setHighlightedItems(newHighlighted);
+    };
+
+    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      handleScroll(); // 초기 체크
+      
+      return () => scrollContainer.removeEventListener('scroll', handleScroll);
     }
   }, [step]);
 
@@ -2418,13 +2471,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-6 pb-32">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             
             {/* 페이지 타이틀 */}
             <h1 className="text-[32px] font-bold text-white mb-8">면접 분석 리포트</h1>
             
             {/* 평가 항목별 점수 테이블 */}
-            <div className="mb-8">
+            <div id="score-table" className="mb-8">
               <div className="rounded-2xl overflow-hidden border border-[#3D3D3D]">
                 {/* Table Header */}
                 <div className="grid grid-cols-3 bg-[#000000] text-white text-base font-medium py-4">
@@ -2463,8 +2516,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
 
             {/* 전공 적합성 섹션 */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-white">전공 적합성</h2>
+            <div id="major-fit" className="mb-8">
+              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
+                highlightedItems.includes('major-fit') ? 'text-[#ff5500]' : 'text-white'
+              }`}>전공 적합성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
                   지원자가 디자인과 공학 융합이라는 학과 특성을 정확히 이해하고 있습니다. '스마트 라이프' 공모전 경험과 사용자 경험(UX), 인터랙션 디자인에 대한 구체적인 관심사를 제시하였으며, 전동카트 조작판 개선 사례를 통해 전공 관련 문제 해결 경험과 적용 능력을 입증했습니다.
@@ -2527,8 +2582,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
 
             {/* 학업 역량 섹션 */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-white">학업 역량</h2>
+            <div id="academic-capability" className="mb-8">
+              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
+                highlightedItems.includes('academic-capability') ? 'text-[#ff5500]' : 'text-white'
+              }`}>학업 역량</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
                   사용자 연구 기반 실험 설계를 학습하고자 하는 구체적인 학업 목표가 명확합니다. 색상·버튼 크기·배열 등 인지 심리학 요소를 실험에 적용한 경험을 보유하며, 문제 해결 과정에서 구조적 설계와 기능적 완성도를 고려한 제품 아이디어를 제안했습니다.
@@ -2591,8 +2648,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
 
             {/* 인성, 태도 섹션 */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-white">인성, 태도</h2>
+            <div id="personality-attitude" className="mb-8">
+              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
+                highlightedItems.includes('personality-attitude') ? 'text-[#ff5500]' : 'text-white'
+              }`}>인성, 태도</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
                   팀 프로젝트 경험을 통해 협업과 의사소통 역량을 보여주었습니다. 실생활 문제를 능동적으로 관찰하고 해결하려는 주도적 태도가 드러나며, KAIST에 기여하고자 하는 겸손하고 성실한 자세를 표현했습니다.
@@ -2655,8 +2714,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
 
             {/* 발전 가능성 섹션 */}
-            <div className="mb-8">
-              <h2 className="text-xl font-bold mb-4 text-white">발전 가능성</h2>
+            <div id="growth-potential" className="mb-8">
+              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
+                highlightedItems.includes('growth-potential') ? 'text-[#ff5500]' : 'text-white'
+              }`}>발전 가능성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
                   사용자 행동과 감성을 연구하고 이를 심화하려는 장기적 학업 계획이 구체적입니다. 공학과 디자인의 융합 역량을 발전시켜 사회에 기여하겠다는 명확한 방향성을 제시하였으며, 작은 문제도 디자인적 관점에서 접근하는 습관이 장기적인 성장 가능성을 높입니다.
@@ -2720,8 +2781,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
           </div>
 
-          {/* Action Buttons - Fixed at bottom */}
-          <div className="fixed bottom-0 left-0 right-0 bg-black px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
+          {/* Action Buttons */}
+          <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
               onClick={() => {
                 alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
