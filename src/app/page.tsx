@@ -349,7 +349,11 @@ export default function Home() {
   const handleNextStep = () => {
     if (step === 1 && selectedUniversity) {
       changeStepWithTransition(2, 'forward');
-    } else if (step === 2 && selectedMajor) {
+    } else if (step === 2 && (selectedMajor.trim() || searchTerm.trim())) {
+      // searchTerm이 있다면 selectedMajor로 설정
+      if (searchTerm.trim() && !selectedMajor.trim()) {
+        setSelectedMajor(searchTerm.trim());
+      }
       // 타이머 시작
       setCountdown(5);
       setIsTimerComplete(false);
@@ -2002,13 +2006,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Next Button */}
           <div className="mt-auto w-full pb-8">
             <button
-              disabled={!selectedMajor.trim()}
+              disabled={!selectedMajor.trim() && !searchTerm.trim()}
               onClick={handleNextStep}
               className={`
                 w-full h-12 rounded-lg text-base font-medium
                 transition-all duration-200 ease-in-out
                 active:scale-95
-                ${selectedMajor.trim()
+                ${(selectedMajor.trim() || searchTerm.trim())
                   ? "bg-white text-black hover:bg-gray-100"
                   : "bg-gray-600 text-gray-400 opacity-50 cursor-not-allowed"
                 }
