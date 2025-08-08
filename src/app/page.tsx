@@ -167,6 +167,7 @@ export default function Home() {
   const [useVoiceAPI, setUseVoiceAPI] = useState(true);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
+  const [audioLevel, setAudioLevel] = useState(0);
 
   const [interviewStatus, setInterviewStatus] = useState<'waiting' | 'listening' | 'processing' | 'speaking' | 'user_turn'>('waiting');
 
@@ -1310,6 +1311,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         setAnalyser(analyserNode);
         setMicrophone(stream);
         
+        // 음성 레벨 모니터링 시작
+        startAudioLevelMonitoring(analyserNode);
+        
 
       }
       
@@ -1321,7 +1325,25 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   };
   
-
+  // 음성 레벨 모니터링
+  const startAudioLevelMonitoring = (analyserNode: AnalyserNode) => {
+    const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+    
+    const checkAudioLevel = () => {
+      if (!analyserNode || step !== 4) return; // 면접 중일 때만 모니터링
+      
+      analyserNode.getByteFrequencyData(dataArray);
+      const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+      setAudioLevel(average);
+      
+      // 계속 모니터링
+      if (step === 4 && isMicOn) {
+        requestAnimationFrame(checkAudioLevel);
+      }
+    };
+    
+    checkAudioLevel();
+  };
 
   const toggleMic = async () => {
     if (!isMicOn && !isListening) {
@@ -2137,6 +2159,36 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       <div className="absolute inset-0 bg-purple-500 rounded-full opacity-20"></div>
                       <div className="absolute inset-2 bg-purple-500 rounded-full opacity-15"></div>
                       <div className="absolute inset-4 bg-purple-500 rounded-full opacity-10"></div>
+                    </div>
+                  )}
+                  
+                  {/* 음성 레벨 표시 원 (마이크 ON 상태일 때만) */}
+                  {isMicOn && !isInterviewerSpeaking && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      {/* 외부 원 - 음성 레벨에 따라 크기 변화 */}
+                      <div 
+                        className="absolute rounded-full bg-red-500 opacity-20 transition-all duration-150 ease-out"
+                        style={{
+                          width: `${Math.max(80, 80 + (audioLevel * 2))}px`,
+                          height: `${Math.max(80, 80 + (audioLevel * 2))}px`,
+                        }}
+                      />
+                      {/* 중간 원 */}
+                      <div 
+                        className="absolute rounded-full bg-red-500 opacity-30 transition-all duration-100 ease-out"
+                        style={{
+                          width: `${Math.max(80, 80 + (audioLevel * 1.5))}px`,
+                          height: `${Math.max(80, 80 + (audioLevel * 1.5))}px`,
+                        }}
+                      />
+                      {/* 내부 원 */}
+                      <div 
+                        className="absolute rounded-full bg-red-500 opacity-40 transition-all duration-75 ease-out"
+                        style={{
+                          width: `${Math.max(80, 80 + audioLevel)}px`,
+                          height: `${Math.max(80, 80 + audioLevel)}px`,
+                        }}
+                      />
                     </div>
                   )}
                   
