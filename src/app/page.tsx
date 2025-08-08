@@ -2418,7 +2418,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-6">
+          <div className="flex-1 overflow-y-auto px-6 py-6 pb-32">
             
             {/* 페이지 타이틀 */}
             <h1 className="text-[32px] font-bold text-white mb-8">면접 분석 리포트</h1>
@@ -2721,7 +2721,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Action Buttons - Fixed at bottom */}
-          <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
+          <div className="fixed bottom-0 left-0 right-0 bg-black px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
               onClick={() => {
                 alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
