@@ -2165,54 +2165,61 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   {/* 음성 레벨 표시 원 (마이크 ON 상태일 때만) */}
                   {isMicOn && !isInterviewerSpeaking && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      {/* 외부 원 - 더 큰 반응성과 펄스 효과 */}
+                      {/* 외부 원 - 더 큰 크기와 강화된 펄스 효과 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 transition-all duration-200 ease-out animate-pulse"
+                        className="absolute rounded-full bg-blue-500 transition-all duration-200 ease-out animate-pulse"
                         style={{
-                          width: `${Math.max(90, 90 + (audioLevel * 3))}px`,
-                          height: `${Math.max(90, 90 + (audioLevel * 3))}px`,
-                          opacity: Math.min(0.15 + (audioLevel / 255) * 0.25, 0.4),
+                          width: `${Math.max(120, 120 + (audioLevel * 5))}px`,
+                          height: `${Math.max(120, 120 + (audioLevel * 5))}px`,
+                          opacity: Math.min(0.15 + (audioLevel / 255) * 0.3, 0.45),
+                          transform: `scale(${1 + (audioLevel / 255) * 0.8})`,
                         }}
                       />
-                      {/* 중간 원 - 펄스와 크기 변화 */}
+                      {/* 중간 원 - 확장된 스케일 범위 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 transition-all duration-150 ease-out"
+                        className="absolute rounded-full bg-blue-500 transition-all duration-150 ease-out"
                         style={{
-                          width: `${Math.max(85, 85 + (audioLevel * 2))}px`,
-                          height: `${Math.max(85, 85 + (audioLevel * 2))}px`,
-                          opacity: Math.min(0.2 + (audioLevel / 255) * 0.3, 0.5),
-                          transform: `scale(${1 + (audioLevel / 255) * 0.3})`,
+                          width: `${Math.max(100, 100 + (audioLevel * 4))}px`,
+                          height: `${Math.max(100, 100 + (audioLevel * 4))}px`,
+                          opacity: Math.min(0.2 + (audioLevel / 255) * 0.35, 0.55),
+                          transform: `scale(${1 + (audioLevel / 255) * 0.6})`,
                         }}
                       />
                       {/* 내부 원 - 기본 활성화 상태 표시 */}
                       <div 
-                        className="absolute rounded-full bg-red-500 transition-all duration-100 ease-out"
+                        className="absolute rounded-full bg-blue-500 transition-all duration-100 ease-out"
                         style={{
-                          width: `${Math.max(80, 80 + (audioLevel * 1.2))}px`,
-                          height: `${Math.max(80, 80 + (audioLevel * 1.2))}px`,
-                          opacity: Math.min(0.3 + (audioLevel / 255) * 0.2, 0.5),
+                          width: `${Math.max(90, 90 + (audioLevel * 2.5))}px`,
+                          height: `${Math.max(90, 90 + (audioLevel * 2.5))}px`,
+                          opacity: Math.min(0.25 + (audioLevel / 255) * 0.3, 0.55),
+                          transform: `scale(${1 + (audioLevel / 255) * 0.4})`,
                         }}
                       />
                     </div>
                   )}
                   
-                  {/* 마이크 버튼 */}
+                  {/* 마이크 버튼 - 크기 확대 */}
                   <button
                     onClick={toggleMic}
                     disabled={isInterviewerSpeaking || isProcessingResponse}
-                    className={`relative w-20 h-20 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4 ${
+                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4 ${
                       isMicOn && !isInterviewerSpeaking 
-                        ? 'bg-red-500 border-red-400 hover:bg-red-600' 
+                        ? 'bg-blue-500 border-blue-400 hover:bg-blue-600' 
                         : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
                     } ${
                       (isInterviewerSpeaking || isProcessingResponse) ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
+                    style={{
+                      transform: isMicOn && !isInterviewerSpeaking 
+                        ? `scale(${1.1 + (audioLevel / 255) * 0.2})` 
+                        : 'scale(1)'
+                    }}
                   >
                     <Image 
                       src={isMicOn ? "/mic-on.svg" : "/mic-off.svg"} 
                       alt={isMicOn ? "Microphone On" : "Microphone Off"} 
-                      width={80} 
-                      height={80}
+                      width={96} 
+                      height={96}
                       className="object-contain"
                       priority
                     />
