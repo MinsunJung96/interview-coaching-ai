@@ -181,6 +181,7 @@ export default function Home() {
   
   // Analysis Report Banner State
   const [showReportBanner, setShowReportBanner] = useState(false);
+  const [showSampleModal, setShowSampleModal] = useState(false);
   const [lastTransitionTime, setLastTransitionTime] = useState<number>(600);
 
   // 시간 기반 면접 단계 결정 함수
@@ -1645,15 +1646,15 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step]); // hasAskedFirstQuestion 의존성 제거
 
-  // Step 6 (Analysis Report) 배너 애니메이션
+  // Step 6 (Analysis Report) 모달 애니메이션
   useEffect(() => {
     if (step === 6) {
-      // 배너 상태 초기화
-      setShowReportBanner(false);
+      // 모달 상태 초기화
+      setShowSampleModal(false);
       
-      // 0.5초 후 배너 슬라이드 인
+      // 0.5초 후 모달 표시
       const timer = setTimeout(() => {
-        setShowReportBanner(true);
+        setShowSampleModal(true);
       }, 500);
       
       return () => clearTimeout(timer);
@@ -2367,51 +2368,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {step === 6 && (
         <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
-            <button 
-              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
-              className="p-2 text-white hover:text-gray-300 transition-colors"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            
-            <h1 className="text-[20px] font-bold text-white">면접 분석 리포트</h1>
-            
-            <button className="p-2 text-white hover:text-gray-300 transition-colors">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 9L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M8 13L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
-
-          {/* Report Banner */}
-          <div className={`overflow-hidden transition-all duration-500 ease-out ${
-            showReportBanner ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
-          }`}>
-            <div className="bg-[#121212] border border-[#3D3D3D] mx-6 rounded-xl p-4 mb-4">
-              <div className="text-center">
-                <p className="text-gray-300 text-sm mb-2">샘플 리포트 보고 있어요.</p>
-                <p className="text-white text-sm mb-3">실제 리포트를 받아보고 싶으신가요?</p>
-                <button 
-                  onClick={() => {
-                    alert('실제 면접을 진행해보세요!');
-                    setStep(0); // 메인으로 이동
-                  }}
-                  className="bg-[#ff5500] hover:bg-[#e64a00] text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  네, 받아볼래요
-                </button>
-              </div>
-            </div>
+          {/* Page Title */}
+          <div className="px-6 pt-6 pb-4">
+            <h1 className="text-[28px] font-bold text-white text-left">면접 분석 리포트</h1>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 py-0">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             
             {/* 평가 항목별 점수 테이블 */}
             <div className="mb-8">
@@ -2574,6 +2537,36 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             >
               무제한 면접 AI 코칭
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sample Report Modal */}
+      {showSampleModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6 max-w-md w-full mx-4">
+            <div className="text-center">
+              <h3 className="text-white text-lg font-bold mb-2">샘플 리포트 보고 있어요.</h3>
+              <p className="text-gray-300 text-sm mb-6">실제 리포트를 받아보고 싶으신가요?</p>
+              
+              <div className="flex space-x-3">
+                <button 
+                  onClick={() => setShowSampleModal(false)}
+                  className="flex-1 bg-gray-700 hover:bg-gray-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                >
+                  닫기
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowSampleModal(false);
+                    setStep(0); // 메인으로 이동
+                  }}
+                  className="flex-1 bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                >
+                  네, 받아볼래요
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
