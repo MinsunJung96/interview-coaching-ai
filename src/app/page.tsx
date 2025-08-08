@@ -1906,17 +1906,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             <div className="mb-4">
               <h1 className="text-4xl font-bold text-white leading-tight">
                 <span className="inline-flex">
-                  <span>
+                  <span className="transform transition-all duration-200">
                     {digitAnimations.thousands}
                   </span>
                   <span>,</span>
-                  <span>
+                  <span className="transform transition-all duration-200">
                     {digitAnimations.hundreds}
                   </span>
-                  <span>
+                  <span className="transform transition-all duration-200">
                     {digitAnimations.tens}
                   </span>
-                  <span>
+                  <span className="transform transition-all duration-200">
                     {digitAnimations.ones}
                   </span>
                 </span>
