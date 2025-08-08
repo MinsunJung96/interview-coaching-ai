@@ -1652,10 +1652,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       // 모달 상태 초기화
       setShowSampleModal(false);
       
-      // 0.5초 후 모달 표시
+      // 1초 후 모달 표시
       const timer = setTimeout(() => {
         setShowSampleModal(true);
-      }, 500);
+      }, 1000);
       
       return () => clearTimeout(timer);
     }
@@ -2368,13 +2368,30 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       {step === 6 && (
         <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
-          {/* Page Title */}
-          <div className="px-6 pt-6 pb-4">
-            <h1 className="text-[28px] font-bold text-white text-left">면접 분석 리포트</h1>
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+            <button 
+              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
+              className="p-2 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            
+            <h1 className="text-[20px] font-bold text-white">면접 분석 리포트</h1>
+            
+            <button className="p-2 text-white hover:text-gray-300 transition-colors">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7Z" stroke="currentColor" strokeWidth="2"/>
+                <path d="M8 9L16 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <path d="M8 13L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto px-6 pb-6">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             
             {/* 평가 항목별 점수 테이블 */}
             <div className="mb-8">
@@ -2543,9 +2560,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Sample Report Modal */}
       {showSampleModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
             <div className="text-center">
+              {/* Sample SVG Icon */}
+              <div className="flex justify-center mb-4">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="48" height="48" rx="8" fill="#ff5500" fillOpacity="0.1"/>
+                  <rect x="1" y="1" width="46" height="46" rx="7" stroke="#ff5500" strokeOpacity="0.3"/>
+                  <path d="M14 18h20M14 24h16M14 30h12" stroke="#ff5500" strokeWidth="2" strokeLinecap="round"/>
+                  <circle cx="34" cy="14" r="6" fill="#ff5500"/>
+                  <text x="34" y="18" textAnchor="middle" className="fill-white text-xs font-bold">샘플</text>
+                </svg>
+              </div>
+              
               <h3 className="text-white text-lg font-bold mb-2">샘플 리포트 보고 있어요.</h3>
               <p className="text-gray-300 text-sm mb-6">실제 리포트를 받아보고 싶으신가요?</p>
               
