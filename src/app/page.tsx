@@ -2477,7 +2477,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             <div className="flex items-center gap-3 mb-8">
               <h1 className="text-[32px] font-bold text-white">면접 분석 리포트</h1>
               <span className="bg-gray-600 text-white text-sm font-medium px-3 py-1 rounded-lg">
-                Sample
+                예시
               </span>
             </div>
             
