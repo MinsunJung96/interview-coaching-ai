@@ -2262,7 +2262,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+          <div className="flex items-center justify-between p-4">
             <button 
               onClick={() => setStep(5)}
               className="p-2 text-white hover:text-gray-300 transition-colors"
@@ -2276,99 +2276,74 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-8">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             
             {/* 평가 항목별 점수 테이블 */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold mb-6">평가 항목별 점수</h2>
-              
-              <div className="bg-gray-900 rounded-lg overflow-hidden">
+            <div className="mb-8">
+              <div className="bg-gray-800 rounded-2xl overflow-hidden border border-gray-700">
                 {/* Table Header */}
-                <div className="grid grid-cols-3 bg-gray-800 text-gray-300 text-sm font-medium">
-                  <div className="p-4 text-left">평가 항목</div>
-                  <div className="p-4 text-center">배점</div>
-                  <div className="p-4 text-center">점수</div>
+                <div className="grid grid-cols-3 bg-gray-700 text-gray-300 text-base font-medium py-4">
+                  <div className="px-6 text-left">평가 항목</div>
+                  <div className="px-6 text-center">배점</div>
+                  <div className="px-6 text-center">점수</div>
                 </div>
                 
                 {/* Table Rows */}
-                <div className="divide-y divide-gray-700">
-                  <div className="grid grid-cols-3 items-center">
-                    <div className="p-4 text-white font-medium">전공 적합성</div>
-                    <div className="p-4 text-center text-gray-300">30</div>
-                    <div className="p-4 text-center text-blue-400 font-bold text-lg">26</div>
+                <div className="bg-gray-800">
+                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                    <div className="px-6 text-white font-medium">전공 적합성</div>
+                    <div className="px-6 text-center text-white">30</div>
+                    <div className="px-6 text-center text-blue-400 font-bold text-xl">26</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center">
-                    <div className="p-4 text-white font-medium">학업 역량</div>
-                    <div className="p-4 text-center text-gray-300">30</div>
-                    <div className="p-4 text-center text-blue-400 font-bold text-lg">24</div>
+                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                    <div className="px-6 text-white font-medium">학업 역량</div>
+                    <div className="px-6 text-center text-white">30</div>
+                    <div className="px-6 text-center text-blue-400 font-bold text-xl">24</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center">
-                    <div className="p-4 text-white font-medium">인성, 태도</div>
-                    <div className="p-4 text-center text-gray-300">20</div>
-                    <div className="p-4 text-center text-blue-400 font-bold text-lg">18</div>
+                  <div className="grid grid-cols-3 items-center py-4 border-b border-gray-700">
+                    <div className="px-6 text-white font-medium">인성, 태도</div>
+                    <div className="px-6 text-center text-white">20</div>
+                    <div className="px-6 text-center text-blue-400 font-bold text-xl">18</div>
                   </div>
                   
-                  <div className="grid grid-cols-3 items-center">
-                    <div className="p-4 text-white font-medium">발전 가능성</div>
-                    <div className="p-4 text-center text-gray-300">20</div>
-                    <div className="p-4 text-center text-red-400 font-bold text-lg">13</div>
+                  <div className="grid grid-cols-3 items-center py-4">
+                    <div className="px-6 text-white font-medium">발전 가능성</div>
+                    <div className="px-6 text-center text-white">20</div>
+                    <div className="px-6 text-center text-red-400 font-bold text-xl">13</div>
                   </div>
-                </div>
-                
-                {/* Total Score */}
-                <div className="grid grid-cols-3 bg-gray-800 border-t-2 border-orange-500">
-                  <div className="p-4 text-white font-bold">총점</div>
-                  <div className="p-4 text-center text-gray-300 font-bold">100</div>
-                  <div className="p-4 text-center text-orange-400 font-bold text-xl">81</div>
                 </div>
               </div>
             </div>
 
             {/* 전공 적합성 섹션 */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">전공 적합성</h2>
-              <div className="bg-gray-900 rounded-lg p-6">
-                <p className="text-gray-300 leading-relaxed">
-                  지원 전공에 대한 이해도와 관련 경험이 우수합니다. 전공 관련 질문에 대해 구체적이고 논리적으로 답변하였으며, 
-                  해당 분야에 대한 진정한 관심과 열정을 보여주었습니다. 다만, 실무 경험이나 프로젝트 경험을 더 구체적으로 
-                  설명할 수 있다면 더욱 인상적일 것입니다.
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-white">전공 적합성</h2>
+              <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                <p className="text-gray-300 leading-relaxed text-base">
+                  Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl.
                 </p>
               </div>
             </div>
 
-            {/* 학업 역량 섹션 */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">학업 역량</h2>
-              <div className="bg-gray-900 rounded-lg p-6">
-                <p className="text-gray-300 leading-relaxed">
-                  학업에 대한 태도와 성취도가 양호합니다. 어려운 상황에서도 포기하지 않고 문제를 해결하려는 의지를 보여주었으며, 
-                  지속적인 학습과 성장에 대한 의욕이 높습니다. 향후 더 체계적인 학습 계획과 목표 설정을 통해 
-                  학업 역량을 더욱 발전시킬 수 있을 것입니다.
-                </p>
-              </div>
-            </div>
-
-            {/* 인성, 태도 섹션 */}
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">인성, 태도</h2>
-              <div className="bg-gray-900 rounded-lg p-6">
-                <p className="text-gray-300 leading-relaxed">
-                  긍정적이고 성실한 태도를 보여주었습니다. 타인을 배려하는 마음과 협력적인 자세가 돋보이며, 
-                  어려운 상황에서도 차분하게 대응하는 모습이 인상적입니다. 리더십 경험이나 팀워크 관련 사례를 
-                  더 구체적으로 제시한다면 더욱 좋은 평가를 받을 수 있을 것입니다.
+            {/* 전공 적합성 섹션 (두 번째) */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold mb-4 text-white">전공 적합성</h2>
+              <div className="bg-gray-800 rounded-2xl p-6 border border-gray-700">
+                <p className="text-gray-300 leading-relaxed text-base">
+                  Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl. Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque. Semper amet laoreet urna sit. Egestas leo euismod eget eu semper tristique nisl. Lorem ipsum dolor sit amet consectetur. Justo morbi eu sed pretium velit ultricies. Nec tortor vestibulum et congue mauris amet facilisi est scelerisque.
                 </p>
               </div>
             </div>
 
           </div>
 
-          {/* Action Buttons */}
-          <div className="p-4 border-t border-gray-800 space-y-3">
+          {/* Action Buttons - Fixed at bottom */}
+          <div className="px-6 pb-6 space-y-3">
             <button
               onClick={() => setStep(0)} // 메인으로 돌아가기
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-4 rounded-lg font-medium transition-colors active:scale-95"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               다시 면접 보기
             </button>
@@ -2376,7 +2351,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               onClick={() => {
                 alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
               }}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors active:scale-95"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               무제한 면접 AI 코칭
             </button>
