@@ -2062,7 +2062,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             <div 
               className="fixed bottom-0 left-0 right-0 transition-all duration-150 ease-out z-15 pointer-events-none"
               style={{
-                height: `${Math.max(0, (audioLevel / 255) * 40)}%`,
+                // Map audioLevel [0,255] to heightPercent [20,40]
+                height: `${20 + ((audioLevel / 255) * 20)}%`,
                 background: 'linear-gradient(to top, rgba(255, 85, 0, 0.5) 0%, transparent 100%)',
               }}
             />
