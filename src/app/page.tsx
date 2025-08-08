@@ -2167,7 +2167,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               </div> */}
               
               {/* Microphone Button with User Turn Indicator */}
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
                 <div className="relative">
                   {/* 사용자 차례 표시 애니메이션 */}
                   {interviewStatus === 'user_turn' && (
@@ -2180,14 +2180,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   
 
                   
-                  {/* 마이크 버튼 - 크기 확대 */}
+                  {/* 마이크 버튼 - 크기 확대, stroke 제거 */}
                   <button
                     onClick={toggleMic}
                     disabled={isInterviewerSpeaking || isProcessingResponse}
-                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg border-4 ${
+                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg ${
                       isMicOn && !isInterviewerSpeaking 
-                        ? 'bg-blue-500 border-blue-400 hover:bg-blue-600' 
-                        : 'bg-gray-700 border-gray-600 hover:bg-gray-600'
+                        ? 'bg-blue-500 hover:bg-blue-600' 
+                        : 'bg-gray-700 hover:bg-gray-600'
                     } ${
                       (isInterviewerSpeaking || isProcessingResponse) ? 'opacity-50 cursor-not-allowed' : 'opacity-100'
                     }`}
@@ -2202,7 +2202,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       alt={isMicOn ? "Microphone On" : "Microphone Off"} 
                       width={96} 
                       height={96}
-                      className="object-contain"
+                      className="object-contain opacity-100"
                       priority
                     />
                   </button>
