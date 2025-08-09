@@ -210,6 +210,9 @@ function Home() {
   // Premium Paywall State
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   
+  // Step 5 Exit Modal State
+  const [showExitModal, setShowExitModal] = useState(false);
+  
   // 스크롤 기반 강조 효과를 위한 상태
   const [highlightedItems, setHighlightedItems] = useState<string[]>([]);
   
@@ -217,6 +220,7 @@ function Home() {
   const [isSlideOutLeft, setIsSlideOutLeft] = useState(false);
   const [isSlideOutRight, setIsSlideOutRight] = useState(false);
   const [isSlideInLeft, setIsSlideInLeft] = useState(false);
+  const [isSlideInRight, setIsSlideInRight] = useState(false);
 
   // 시간 기반 면접 단계 결정 함수
   const getInterviewPhase = (timeRemaining: number): 'intro' | 'major' | 'personality' | 'social' | 'university' => {
@@ -280,10 +284,21 @@ function Home() {
     setSelectedUniversity(university);
   }, []);
 
+  // 모든 애니메이션 상태 초기화
+  const resetAllAnimationStates = () => {
+    setIsSlideOutLeft(false);
+    setIsSlideOutRight(false);
+    setIsSlideInLeft(false);
+    setIsSlideInRight(false);
+  };
+
   // Step transition function with animation
   const changeStepWithTransition = (newStep: number, direction: 'forward' | 'backward' = 'forward') => {
+    // 시작 전 모든 애니메이션 상태 초기화
+    resetAllAnimationStates();
+    
     if (direction === 'backward') {
-      // backward: 현재 화면은 오른쪽으로 슬라이드 아웃, 새 화면은 왼쪽에서 슬라이드 인
+      // backward: 현재 화면은 > 으로 슬라이드 아웃 (오른쪽으로), 새 화면은 > 슬라이드 인 (왼쪽에서)
       setIsSlideOutRight(true);
       
       setTimeout(() => {
@@ -293,18 +308,52 @@ function Home() {
         
         // 슬라이드 인 애니메이션 완료 후 상태 리셋
         setTimeout(() => {
-          setIsSlideInLeft(false);
+          resetAllAnimationStates();
         }, 300);
       }, 300); // 300ms 애니메이션 지속시간
     } else {
-      // forward는 오른쪽에서 왼쪽으로 슬라이드 아웃
+      // forward: 현재 화면은 < 으로 슬라이드 아웃 (왼쪽으로), 새 화면은 < 슬라이드 인 (오른쪽에서)
       setIsSlideOutLeft(true);
       
       setTimeout(() => {
-      setStep(newStep);
+        setStep(newStep);
         setIsSlideOutLeft(false);
+        // Step 8은 특별히 아래에서 위로 올라오는 애니메이션 사용
+        if (newStep === 8) {
+          // Step 8은 slideInUp 애니메이션을 위해 상태를 설정하지 않음 (CSS에서 직접 처리)
+        } else {
+          setIsSlideInRight(true);
+          
+          // 슬라이드 인 애니메이션 완료 후 상태 리셋
+          setTimeout(() => {
+            resetAllAnimationStates();
+          }, 300);
+        }
       }, 300);
     }
+  };
+
+  // 통일된 슬라이드 애니메이션 클래스 계산
+  const getStepClassName = (baseClasses: string) => {
+    const result = 
+      isSlideOutLeft ? `${baseClasses} animate-slideOutLeft` :
+      isSlideOutRight ? `${baseClasses} animate-slideOutRight` :
+      isSlideInLeft ? `${baseClasses} animate-slideInLeft` :
+      isSlideInRight ? `${baseClasses} animate-slideInRight` :
+      baseClasses;
+    
+    // 디버깅용 로그
+    if (isSlideOutLeft || isSlideOutRight || isSlideInLeft || isSlideInRight) {
+      console.log('🎬 Animation State:', {
+        isSlideOutLeft,
+        isSlideOutRight, 
+        isSlideInLeft,
+        isSlideInRight,
+        result
+      });
+    }
+    
+    return result;
   };
 
   // Function to calculate digit value with overshoot effect
@@ -1835,7 +1884,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
-      {step !== 0 && step !== 6 && step !== 7 && (
+      {step !== 0 && step !== 6 && step !== 7 && step !== 8 && (
         <div className={`flex items-center justify-between p-4 ${(step === 3 || step === 4) ? 'relative z-30' : ''}`}>
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
@@ -1866,27 +1915,12 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 setPhaseTransitionPending(false);
               }
             } else if (step === 5) {
-              // 완료 화면에서 메인으로 돌아가기
-              if (confirm("메인 화면으로 돌아가시겠습니까?")) {
-                // 완전한 오디오 정리 실행 (대화 기록도 초기화)
-                completeAudioCleanup(false);
-                
-                setStep(1);
-                setSelectedUniversity(null);
-                setSelectedMajor("");
-                setConversationHistory([]);
-                setInterviewTime(600);
-                setHasAskedFirstQuestion(false);
-                setIsInterviewStarted(false);
-                setUserResponseSummary([]);
-                setCurrentPhase('intro');
-                setLastPhase('intro');
-                setPhaseTransitionPending(false);
-              }
+              // Step 5에서 X 버튼 클릭 시 경고 모달 표시
+              setShowExitModal(true);
             }
           }}
         >
-          {(step === 1 || step === 2 || step === 3 || step === 4) ? (
+          {(step === 1 || step === 2 || step === 3) ? (
             <Image
               src="/Icon_Chevron_Left.svg"
               alt="뒤로가기"
@@ -1985,7 +2019,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 flex flex-col pt-24 px-8 z-15">
+          <div className="flex-1 flex flex-col pt-20 px-8 z-15">
             {/* AI Interview Tag */}
             <div className="mb-4">
               <Image
@@ -2100,12 +2134,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 1: University Selection */}
       {step === 1 && (
-        <div key="step-1" className={`flex-1 flex flex-col items-center px-6 transition-transform duration-300 ease-in-out ${
-          isSlideOutLeft ? 'transform translate-x-full' : 
-          isSlideOutRight ? 'transform translate-x-full' : 
-          isSlideInLeft ? 'animate-slideInLeft' :
-          'transform translate-x-0 animate-slideInRight'
-        }`}>
+        <div key="step-1" className={getStepClassName("flex-1 flex flex-col items-center px-6 transition-transform duration-300 ease-in-out")}>
           <h1 className="text-[24px] font-bold mb-12 text-left w-full leading-relaxed">
             면접을 준비할<br />
             대학을 선택해주세요
@@ -2143,8 +2172,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           ))}
         </div>
 
-          {/* Next Button */}
-          <div className="mt-auto w-full pb-8 px-4">
+          {/* Next Button - Fixed Bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-black">
             <button
               disabled={!selectedUniversity}
               onClick={handleNextStep}
@@ -2166,12 +2195,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 2: Major Selection */}
       {step === 2 && (
-        <div key="step-2" className={`flex-1 flex flex-col px-6 transition-transform duration-300 ease-in-out ${
-          isSlideOutLeft ? 'transform translate-x-full' : 
-          isSlideOutRight ? 'transform translate-x-full' : 
-          isSlideInLeft ? 'animate-slideInLeft' :
-          'transform translate-x-0 animate-slideInRight'
-        }`}>
+        <div key="step-2" className={getStepClassName("flex-1 flex flex-col px-6 transition-transform duration-300 ease-in-out")}>
           <h1 className="text-[24px] font-bold mb-6 text-left leading-relaxed">
             {selectedUniversity?.name}을<br />
             지원하시는군요!
@@ -2217,8 +2241,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </div>
           </div>
 
-          {/* Next Button */}
-          <div className="mt-auto w-full pb-8">
+          {/* Next Button - Fixed Bottom */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-black">
             <button
               disabled={!selectedMajor.trim() && !availableMajors.includes(searchTerm.trim())}
               onClick={handleNextStep}
@@ -2240,7 +2264,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 3: Waiting Room */}
       {step === 3 && (
-        <div key="step-3" className="flex-1 flex flex-col relative animate-slideInRight">
+        <div key="step-3" className={getStepClassName("flex-1 flex flex-col relative")}>
           {/* Full-screen Background Image */}
           <div 
             className="fixed inset-0 bg-cover bg-center z-0"
@@ -2290,7 +2314,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div key="step-4" className="flex-1 flex flex-col relative animate-slideInRight">
+        <div key="step-4" className={getStepClassName("flex-1 flex flex-col relative")}>
           {/* Full Screen Video Background */}
           <div className="fixed inset-0 z-0">
             <video
@@ -2488,7 +2512,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 5: Interview Completion */}
       {step === 5 && (
-        <div key="step-5" className="flex-1 flex flex-col bg-black text-white animate-slideInRight relative">
+        <div key="step-5" className={getStepClassName("flex-1 flex flex-col bg-black text-white relative")}>
 
           {/* Chat History */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
@@ -2556,17 +2580,21 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 6: Analysis Report Sample */}
       {step === 6 && (
-        <div key="step-6" className="fixed inset-0 flex flex-col bg-black text-white animate-slideInRight z-50">
+        <div key="step-6" className={getStepClassName("fixed inset-0 flex flex-col bg-black text-white z-50")}>
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <button 
-              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
+              onClick={() => changeStepWithTransition(5, 'backward')} // Step 5로 돌아가기
               className="p-2 text-white hover:text-gray-300 transition-colors"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Image
+                src="/Icon_Chevron_Left.svg"
+                alt="뒤로가기"
+                width={24}
+                height={24}
+                className="object-contain"
+              />
             </button>
 
             <div></div>
@@ -2901,13 +2929,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Action Buttons */}
           <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
-              onClick={() => setStep(8)}
+              onClick={() => changeStepWithTransition(8, 'forward')}
               className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               무제한 면접 코칭과 분석
             </button>
             <button
-              onClick={() => setStep(0)} // 메인으로 돌아가기
+              onClick={() => changeStepWithTransition(1, 'backward')} // Step 1로 이동
               className="w-full bg-gray-700 hover:bg-gray-600 text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               면접 다시 보기
@@ -2960,17 +2988,21 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 7: Analysis Report */}
       {step === 7 && (
-        <div key="step-7" className="fixed inset-0 flex flex-col bg-black text-white animate-slideInRight z-50">
+        <div key="step-7" className={getStepClassName("fixed inset-0 flex flex-col bg-black text-white z-50")}>
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <button 
-              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
+              onClick={() => changeStepWithTransition(5, 'backward')} // Step 5로 돌아가기
               className="p-2 text-white hover:text-gray-300 transition-colors"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <Image
+                src="/Icon_Chevron_Left.svg"
+                alt="뒤로가기"
+                width={24}
+                height={24}
+                className="object-contain"
+              />
             </button>
 
             <div></div>
@@ -3100,7 +3132,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     </p>
 
                     <button
-                      onClick={() => setStep(6)}
+                      onClick={() => changeStepWithTransition(6, 'forward')}
                       className="mt-6 inline-flex items-center justify-center px-5 py-3 rounded-lg font-medium transition-colors bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
                     >
                       샘플 리포트 보기
@@ -3119,7 +3151,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
             <button 
-              onClick={() => setStep(6)}
+              onClick={() => changeStepWithTransition(6, 'backward')}
               className="p-2 text-white hover:text-gray-300 transition-colors"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3369,6 +3401,60 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       </div>
                     </div>
                   </div>
+          </div>
+        </div>
+      )}
+
+      {/* Step 5 Exit Modal */}
+      {showExitModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-[#2A2A2A] border border-[#525252] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
+            <div className="text-center">
+              {/* Warning Icon */}
+              <div className="flex justify-center mb-4">
+                <Image 
+                  src="/Icon_Warning_Fill.svg" 
+                  alt="경고" 
+                  width={72} 
+                  height={72}
+                  className="object-contain"
+                />
+              </div>
+              
+              <h3 className="text-white text-lg font-bold mb-2">잠깐!</h3>
+              <p className="text-gray-300 text-lg mb-6">지금 나가시면 내용은 저장되지 않습니다.</p>
+              
+              <div className="flex space-x-3">
+                <button 
+                  onClick={() => setShowExitModal(false)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                >
+                  닫기
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowExitModal(false);
+                    // 완전한 오디오 정리 실행 (대화 기록도 초기화)
+                    completeAudioCleanup(false);
+                    
+                    setStep(1);
+                    setSelectedUniversity(null);
+                    setSelectedMajor("");
+                    setConversationHistory([]);
+                    setInterviewTime(600);
+                    setHasAskedFirstQuestion(false);
+                    setIsInterviewStarted(false);
+                    setUserResponseSummary([]);
+                    setCurrentPhase('intro');
+                    setLastPhase('intro');
+                    setPhaseTransitionPending(false);
+                  }}
+                  className="flex-1 bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                >
+                  나가기
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
