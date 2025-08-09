@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 // TypeScript 타입 정의
@@ -11,36 +11,15 @@ declare global {
   }
 }
 
-// Hydration 에러 방지를 위한 커스텀 훅
+// Hydration 에러 방지
 function useClientOnly() {
-  const [mounted, setMounted] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   
   useEffect(() => {
-    setMounted(true);
+    setIsClient(true);
   }, []);
   
-  return mounted;
-}
-
-// 클라이언트 사이드에서만 사용할 수 있는 window 객체 접근을 위한 훅
-function useWindowSize() {
-  const [size, setSize] = useState([0, 0]);
-  const isClient = useClientOnly();
-
-  useEffect(() => {
-    if (!isClient) return;
-
-    function updateSize() {
-      setSize([window.innerWidth, window.innerHeight]);
-    }
-
-    window.addEventListener('resize', updateSize);
-    updateSize();
-
-    return () => window.removeEventListener('resize', updateSize);
-  }, [isClient]);
-
-  return isClient ? size : [0, 0];
+  return isClient;
 }
 
 const universities = [
@@ -154,26 +133,26 @@ interface University {
   bg: string;
 }
 
-
-
-export default Home;
-
-function Home() {
+export default function Home() {
   const isClient = useClientOnly();
   const [step, setStep] = useState(0);
-  
-
 
   const [selectedUniversity, setSelectedUniversity] = useState<University | null>(null);
   
   // Animation states for Step 0
-  const [digitAnimations, setDigitAnimations] = useState({ thousands: 0, hundreds: 0, tens: 0, ones: 0 });
+  const [countNumber, setCountNumber] = useState(0);
   const [activeListItems, setActiveListItems] = useState<number[]>([]);
   const [isTeachersVisible, setIsTeachersVisible] = useState(false);
+  const [digitAnimations, setDigitAnimations] = useState({
+    thousands: 0,
+    hundreds: 0,
+    tens: 0,
+    ones: 0
+  });
   const [selectedMajor, setSelectedMajor] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(5);
   const [isTimerComplete, setIsTimerComplete] = useState(false);
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
@@ -185,8 +164,6 @@ function Home() {
   const [isInterviewerMouthOpen, setIsInterviewerMouthOpen] = useState(false);
   const [currentInterviewerVideo, setCurrentInterviewerVideo] = useState('interviewer-listening');
   const [lastVoiceAPICall, setLastVoiceAPICall] = useState(0);
-  // Step 3 카운트다운 기준 시각 저장 (렌더와 무관하게 유지)
-  const countdownDeadlineRef = useRef<number | null>(null);
   const [useVoiceAPI, setUseVoiceAPI] = useState(true);
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
@@ -206,9 +183,6 @@ function Home() {
   const [showReportBanner, setShowReportBanner] = useState(false);
   const [showSampleModal, setShowSampleModal] = useState(false);
   const [lastTransitionTime, setLastTransitionTime] = useState<number>(600);
-  
-  // Premium Paywall State
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
   
   // 스크롤 기반 강조 효과를 위한 상태
   const [highlightedItems, setHighlightedItems] = useState<string[]>([]);
@@ -276,9 +250,9 @@ function Home() {
     }
   };
 
-  const handleUniversitySelect = useCallback((university: University) => {
+  const handleUniversitySelect = (university: University) => {
     setSelectedUniversity(university);
-  }, []);
+  };
 
   // Step transition function with animation
   const changeStepWithTransition = (newStep: number, direction: 'forward' | 'backward' = 'forward') => {
@@ -326,9 +300,92 @@ function Home() {
     }
   };
 
+  // Step 0 animations
+  useEffect(() => {
+    if (step === 0) {
+      // Reset animation states
+      setCountNumber(0);
+      setActiveListItems([]);
+      setIsTeachersVisible(false);
+      setDigitAnimations({
+        thousands: 0,
+        hundreds: 0,
+        tens: 0,
+        ones: 0
+      });
+      
+      // Start animations after a small delay to ensure proper hydration
+      const startAnimations = () => {
+        // Teachers image fade-in animation (start immediately)
+        setIsTeachersVisible(true);
+        
+        // Individual digit animations with different speeds and overshoot
+        const updateInterval = 30; // Update every 30ms for smoother animation
+        
+        // Target digits for 3,780
+        const targets = {
+          thousands: 3,
+          hundreds: 7,
+          tens: 8,
+          ones: 0
+        };
+        
+        // Different durations for each digit (faster - complete in 1 second)
+        const durations = {
+          thousands: 200,  // 0.2 seconds
+          hundreds: 400,   // 0.4 seconds
+          tens: 700,       // 0.7 seconds
+          ones: 1000       // 1 second
+        };
+        
+        const startTime = Date.now();
+        
+        const digitInterval = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          
+          setDigitAnimations({
+            thousands: getDigitValue(elapsed, durations.thousands, targets.thousands),
+            hundreds: getDigitValue(elapsed, durations.hundreds, targets.hundreds),
+            tens: getDigitValue(elapsed, durations.tens, targets.tens),
+            ones: getDigitValue(elapsed, durations.ones, targets.ones)
+          });
+          
+          // Clear when all animations are complete
+          if (elapsed >= Math.max(...Object.values(durations)) + 300) {
+            setDigitAnimations(targets);
+            clearInterval(digitInterval);
+          }
+        }, updateInterval);
+        
+        // List items activation (start after 1 second delay)
+        setTimeout(() => {
+          // Activate first item
+          setActiveListItems([0]);
+          
+          // Activate second item after 1000ms
+          setTimeout(() => {
+            setActiveListItems([0, 1]);
+            
+            // Activate third item after another 1000ms
+            setTimeout(() => {
+              setActiveListItems([0, 1, 2]);
+            }, 1000);
+          }, 1000);
+        }, 500); // Start 0.5 seconds after count-up completion (1000ms + 500ms)
+        
+        return digitInterval;
+      };
+      
+      // Start animations after hydration delay
+      const animationTimeout = setTimeout(startAnimations, 100);
+      
+      return () => {
+        clearTimeout(animationTimeout);
+      };
+    }
+  }, [step]);
 
-
-  const handleNextStep = useCallback(() => {
+  const handleNextStep = () => {
     if (step === 1 && selectedUniversity) {
       changeStepWithTransition(2, 'forward');
     } else if (step === 2 && (selectedMajor.trim() || searchTerm.trim())) {
@@ -344,19 +401,19 @@ function Home() {
       setInterviewTime(600); // 10분 타이머 시작
       changeStepWithTransition(4, 'forward');
     }
-  }, [step, selectedUniversity, selectedMajor, searchTerm, isTimerComplete]);
+  };
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchTerm(value);
     setIsDropdownOpen(value.length > 0);
-  }, []);
+  };
 
-  const handleMajorSelect = useCallback((major: string) => {
+  const handleMajorSelect = (major: string) => {
     setSelectedMajor(major);
     setSearchTerm(major);
     setIsDropdownOpen(false);
-  }, []);
+  };
 
   // 음성 인식 설정
   const [recognition, setRecognition] = useState<any>(null);
@@ -1393,23 +1450,19 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   };
 
-  const formatTime = useCallback((seconds: number) => {
+  const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  }, []);
+  };
 
-  // 선택된 대학의 전공 리스트 가져오기 (useMemo로 최적화)
-  const availableMajors = useMemo(() => {
-    return selectedUniversity ? majorsByUniversity[selectedUniversity.name] || [] : [];
-  }, [selectedUniversity]);
+  // 선택된 대학의 전공 리스트 가져오기
+  const availableMajors = selectedUniversity ? majorsByUniversity[selectedUniversity.name] || [] : [];
   
-  // 검색어로 필터링 (useMemo로 최적화)
-  const filteredMajors = useMemo(() => {
-    return availableMajors.filter((major) =>
-      major.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [availableMajors, searchTerm]);
+  // 검색어로 필터링
+  const filteredMajors = availableMajors.filter((major) =>
+    major.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   // 화면 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -1426,19 +1479,12 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     };
   }, []);
 
-  // Step 3: 대기실 3초 카운트다운 (진입 시 리셋)
+  // 타이머 로직
   useEffect(() => {
-    if (step === 3 && isClient) {
-      setCountdown(3);
-      setIsTimerComplete(false);
-    }
-  }, [step, isClient]);
-
-  // 메인 타이머 (Step 3, 4)
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: NodeJS.Timeout | undefined;
     
-    if (step === 3 && countdown > 0 && isClient) {
+    // 대기실 7초 카운트다운
+    if (step === 3 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
@@ -1450,133 +1496,61 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       }, 1000);
     }
     
+    // 면접 10분 타이머
+    if (step === 4 && interviewTime > 0) {
+      timer = setInterval(() => {
+        setInterviewTime((prev) => {
+          const newTime = prev - 1;
+          
+          // 시간 종료 체크
+          if (newTime <= 0) {
+            // 면접 시간 종료 시 모든 활동 중지 및 완료 화면으로 이동
+            console.log('면접 시간 종료 - 대화 기록 개수:', conversationHistory.length);
+            
+            // 완전한 오디오 정리 실행 (대화 기록 보존)
+            completeAudioCleanup(true);
+            
+            // 완료 화면으로 이동
+            setStep(5);
+            return 0;
+          }
+          
+          // 단계 전환 시간 감지 (면접관이 말하고 있지 않고, 응답 처리 중이 아닐 때만)
+          if (!isInterviewerSpeaking && !isProcessingResponse && !phaseTransitionPending) {
+            const expectedPhase = getInterviewPhase(newTime);
+            const currentActualPhase = currentPhase;
+            
+            // 시간 기반으로 단계가 변경되어야 하는지 확인
+            if (expectedPhase !== currentActualPhase) {
+              // 단계 전환 시점 감지 (한 번만 로깅)
+              const transitionPoints = {
+                'intro-major': 480,
+                'major-personality': 360,
+                'personality-social': 240,
+                'social-university': 120
+              };
+              
+              const transitionKey = `${currentActualPhase}-${expectedPhase}`;
+              const transitionTime = transitionPoints[transitionKey as keyof typeof transitionPoints];
+              
+              // 정확한 전환 시점이거나 이미 지났을 때 (lastTransitionTime으로 중복 방지)
+              if (transitionTime && newTime <= transitionTime && lastTransitionTime > transitionTime) {
+                console.log(`[타이머] 단계 전환 필요 감지: ${currentActualPhase} -> ${expectedPhase} (시간: ${formatTime(newTime)})`);
+                setForcePhaseTransition(true);
+                setLastTransitionTime(transitionTime);
+              }
+            }
+          }
+          
+          return newTime;
+        });
+      }, 1000);
+    }
+
     return () => {
       if (timer) clearInterval(timer);
     };
-  }, [step, countdown, isClient]);
-
-  // Step 4: 면접 10분 타이머
-  useEffect(() => {
-    if (step !== 4 || interviewTime <= 0 || !isClient) return;
-    console.log('Step 4 면접 타이머 시작 - isClient:', isClient);
-    
-    const timer = setInterval(() => {
-      setInterviewTime((prev) => {
-        const newTime = prev - 1;
-        if (newTime <= 0) {
-          console.log('면접 시간 종료 - Step 5로 이동');
-          setStep(5);
-          return 0;
-        }
-        return newTime;
-      });
-    }, 1000);
-    
-    return () => {
-      clearInterval(timer);
-      console.log('Step 4 면접 타이머 클린업');
-    };
-  }, [step, interviewTime, isClient]);
-
-  // Step 0 애니메이션 효과 및 스크롤 제어
-  useEffect(() => {
-    if (step === 0 && isClient) {
-      console.log('Step 0 useEffect 시작 - isClient:', isClient);
-      
-      // Welcome 화면에서 스크롤 막기
-      document.body.style.overflow = 'hidden';
-      
-      // 애니메이션 상태 강제 초기화 (재진입 시에도 애니메이션 시작)
-      console.log('애니메이션 상태 강제 초기화');
-      setDigitAnimations({ thousands: 0, hundreds: 0, tens: 0, ones: 0 });
-      setActiveListItems([]);
-      setIsTeachersVisible(false);
-      
-      // 약간의 지연을 두어 상태 변경이 확실히 적용되도록 함
-      setTimeout(() => {
-        console.log('애니메이션 상태 초기화 완료, 애니메이션 시작');
-      }, 50);
-
-      // 배경 이미지 페이드인 (다음 프레임에서 시작)
-      const fadeInTimeout = setTimeout(() => {
-        console.log('Teachers fade in 실행');
-        setIsTeachersVisible(true);
-      }, 200);
-
-      // 숫자 카운트업 애니메이션 (즉시 시작)
-      let countInterval: NodeJS.Timeout;
-      const digitTimeout = setTimeout(() => {
-        console.log('숫자 애니메이션 시작');
-        const targetDigits = { thousands: 3, hundreds: 7, tens: 8, ones: 0 };
-        const duration = 1000; // 1초
-        const steps = 60; // 60 프레임
-        const stepDuration = duration / steps;
-
-        let currentStep = 0;
-        countInterval = setInterval(() => {
-          currentStep++;
-          const progress = currentStep / steps;
-          
-          setDigitAnimations({
-            thousands: Math.floor(targetDigits.thousands * progress),
-            hundreds: Math.floor(targetDigits.hundreds * progress),
-            tens: Math.floor(targetDigits.tens * progress),
-            ones: Math.floor(targetDigits.ones * progress)
-          });
-
-          if (currentStep >= steps) {
-            clearInterval(countInterval);
-            setDigitAnimations(targetDigits);
-            console.log('숫자 애니메이션 완료');
-          }
-        }, stepDuration);
-      }, 100);
-
-      // 리스트 아이템 순차 활성화 (숫자 애니메이션 완료 후 더 빠르게)
-      const listTimeout1 = setTimeout(() => {
-        console.log('Activating list item 0');
-        setActiveListItems([0]);
-      }, 1400);
-
-      const listTimeout2 = setTimeout(() => {
-        console.log('Activating list items 0, 1');
-        setActiveListItems([0, 1]);
-      }, 1800);
-
-      const listTimeout3 = setTimeout(() => {
-        console.log('Activating list items 0, 1, 2');
-        setActiveListItems([0, 1, 2]);
-      }, 2200);
-
-      // 클린업 함수
-      return () => {
-        clearTimeout(fadeInTimeout);
-        clearTimeout(digitTimeout);
-        clearTimeout(listTimeout1);
-        clearTimeout(listTimeout2);
-        clearTimeout(listTimeout3);
-        if (countInterval) {
-          clearInterval(countInterval);
-        }
-        console.log('Step 0 useEffect 클린업');
-      };
-    } else {
-      // Welcome 화면이 아닐 때 스크롤 복원
-      document.body.style.overflow = 'unset';
-    }
-  }, [step, isClient]);
-
-  // (이전) Step 3 리셋 useEffect는 위 카운트다운 effect에 통합됨
-
-
-
-
-
-
-
-
-
-
+  }, [step, countdown, interviewTime, recognition, isInterviewerSpeaking, isProcessingResponse, currentPhase, phaseTransitionPending, lastTransitionTime]);
 
   // 첫 질문 여부를 추적하는 state 추가
   const [hasAskedFirstQuestion, setHasAskedFirstQuestion] = useState(false);
@@ -1736,8 +1710,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   }, [step]);
 
   // 스크롤 기반 강조 효과
-  // DOM 계산이므로 useLayoutEffect 사용
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (step !== 6) return;
 
     const handleScroll = () => {
@@ -1801,41 +1774,21 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     };
   }, [showSampleModal]);
 
-  // Step 7 리포트 조건 검사 함수들 (useCallback으로 최적화)
-  const getInterviewDurationMinutes = useCallback((): number => {
-    const initialTime = 600; // 10분 = 600초
-    const remainingTime = interviewTime;
-    const elapsedTime = initialTime - remainingTime;
-    return Math.floor(elapsedTime / 60); // 분 단위로 변환
-  }, [interviewTime]);
-
-  const getTotalSpeechCharacters = useCallback((): number => {
-    return conversationHistory
-      .filter(item => item.message && item.message.startsWith('사용자:'))
-      .reduce((total, item) => {
-        // "사용자: " 부분을 제외한 실제 발화 텍스트만 카운트
-        const actualText = item.message.substring(4); // "사용자: " 제거
-        return total + actualText.length;
-      }, 0);
-  }, [conversationHistory]);
-
-  const isReportConditionMet = useCallback((): boolean => {
-    const durationMinutes = getInterviewDurationMinutes();
-    const speechCharacters = getTotalSpeechCharacters();
-    
-    return durationMinutes >= 5 || speechCharacters >= 2000;
-  }, [getInterviewDurationMinutes, getTotalSpeechCharacters]);
-
   // 클라이언트에서만 렌더링 (Hydration 에러 방지)
   if (!isClient) {
-    return null; // SSR 시에는 아무것도 렌더링하지 않음
+    return (
+      <div className="bg-black text-white min-h-screen flex flex-col items-center justify-center">
+        <div className="text-xl">로딩 중...</div>
+        <div className="text-sm mt-2 text-gray-400">하이드레이션 대기 중...</div>
+      </div>
+    );
   }
 
   return (
     <div className="bg-black text-white min-h-screen flex flex-col">
 
       {/* Header */}
-      {step !== 0 && step !== 6 && step !== 7 && (
+      {step !== 0 && step !== 6 && (
         <div className={`flex items-center justify-between p-4 ${(step === 3 || step === 4) ? 'relative z-30' : ''}`}>
         <button 
           className="p-2 text-white hover:text-gray-300 transition-colors"
@@ -1905,21 +1858,6 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         {step === 4 && (
           <button
             onClick={() => {
-              // 먼저 즉시 모든 오디오 중단 (confirm 다이얼로그 전에)
-              if ('speechSynthesis' in window) {
-                speechSynthesis.cancel();
-                console.log('[면접 나가기] Speech synthesis 즉시 중단');
-              }
-              
-              // HTML 오디오 엘리먼트들도 즉시 중단
-              const audioElements = document.querySelectorAll('audio');
-              audioElements.forEach(audio => {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.src = '';
-                console.log('[면접 나가기] HTML Audio 엘리먼트 즉시 중단');
-              });
-              
               if (confirm("면접을 완료하시겠습니까?")) {
                 console.log('면접 완료 - 현재 대화 기록:', conversationHistory);
                 console.log('대화 기록 상세:', JSON.stringify(conversationHistory, null, 2));
@@ -1930,13 +1868,6 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 // 완료 화면으로 이동
                 console.log('Step 5로 이동, 대화 기록 개수:', conversationHistory.length);
                 setStep(5);
-              } else {
-                // 취소한 경우에는 음성 인식을 다시 시작
-                setTimeout(() => {
-                  if (!isInterviewerSpeaking && !isProcessingResponse) {
-                    startRecognitionSafely('면접 나가기 취소 후 재시작');
-                  }
-                }, 1000);
               }
             }}
             className="text-white hover:text-gray-300 transition-colors font-medium"
@@ -2017,7 +1948,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   </span>
                 </span>
                 명 선생님들의<br />
-                학습한 AI 모의 면접
+                면접 후기를 학습했어요!
               </h1>
             </div>
             
@@ -2080,7 +2011,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 alt="선생님들"
                 width={800}
                 height={600}
-                className="w-full max-w-[800px] mx-auto h-auto object-cover object-bottom scale-150 transform -translate-y-20"
+                className="w-full h-auto object-cover object-bottom scale-150 transform -translate-y-20"
                 priority
               />
             </div>
@@ -2178,18 +2109,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </h1>
 
           <div className="mb-4">
-            <label htmlFor="major-search" className="block text-sm font-medium mb-2">전공</label>
+            <label className="block text-sm font-medium mb-2">전공</label>
             <div className="relative dropdown-container">
               <input
                 type="text"
-                id="major-search"
-                name="major"
-                aria-label="지원 전공 검색"
                 placeholder="지원하는 전공을 검색해주세요"
                 value={searchTerm}
                 onChange={handleSearchChange}
                 onFocus={() => setIsDropdownOpen(searchTerm.length > 0)}
-                autoComplete="off"
                 className="
                   w-full bg-[#2A2A2A] rounded-lg p-3 text-white text-base
                   placeholder-gray-400 border-none outline-none
@@ -2220,13 +2147,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Next Button */}
           <div className="mt-auto w-full pb-8">
             <button
-              disabled={!selectedMajor.trim() && !availableMajors.includes(searchTerm.trim())}
+              disabled={!selectedMajor.trim() && !searchTerm.trim()}
               onClick={handleNextStep}
               className={`
                 w-full h-12 rounded-lg text-base font-medium
                 transition-all duration-200 ease-in-out
                 active:scale-95
-                ${(selectedMajor.trim() || availableMajors.includes(searchTerm.trim()))
+                ${(selectedMajor.trim() || searchTerm.trim())
                   ? "bg-white text-black hover:bg-gray-100"
                   : "bg-gray-600 text-gray-400 opacity-50 cursor-not-allowed"
                 }
@@ -2267,24 +2194,39 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             </h1>
           </div>
 
-          {/* New CTA Button */}
+          {/* CTA Button with Progress */}
           <div className="absolute bottom-8 left-6 right-6">
-            <button
-              disabled={!isTimerComplete}
-              onClick={handleNextStep}
-              className={`
-                w-full h-12 rounded-lg text-base font-medium
-                transition-all duration-300 ease-in-out
-                ${isTimerComplete
-                  ? "bg-white text-black hover:bg-gray-100 active:scale-95"
-                  : "bg-gray-600 text-gray-300 cursor-not-allowed"
-                }
-              `}
-            >
-              {isTimerComplete ? "면접 들어가기" : `면접 들어가기 ${countdown}초 전`}
-            </button>
+            <div className="relative">
+              <button
+                disabled={!isTimerComplete}
+                onClick={handleNextStep}
+                className={`
+                  w-full h-12 rounded-lg text-base font-medium relative overflow-hidden
+                  transition-all duration-200 ease-in-out
+                  ${isTimerComplete
+                    ? "bg-white text-black hover:bg-gray-100 active:scale-95"
+                    : "bg-gray-600 text-gray-300 cursor-not-allowed"
+                  }
+                `}
+              >
+                {/* Progress Fill */}
+                <div 
+                  className={`
+                    absolute inset-0 bg-white transition-all duration-1000 ease-linear
+                    ${isTimerComplete ? 'w-full' : ''}
+                  `}
+                  style={{
+                    width: isTimerComplete ? '100%' : `${((5 - countdown) / 5) * 100}%`
+                  }}
+                ></div>
+                
+                {/* Button Text */}
+                <span className="relative z-10 text-black">
+                  {isTimerComplete ? "면접장 들어가기" : `면접장 들어가기 ${countdown}초 전`}
+                </span>
+              </button>
+            </div>
           </div>
-
         </div>
       )}
 
@@ -2554,9 +2496,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         </div>
       )}
 
-      {/* Step 6: Analysis Report Sample */}
+      {/* Step 6: Analysis Report */}
       {step === 6 && (
-        <div key="step-6" className="fixed inset-0 flex flex-col bg-black text-white animate-slideInRight z-50">
+        <div key="step-6" className="flex-1 flex flex-col bg-black text-white animate-slideInRight">
           
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-800">
@@ -2583,7 +2525,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6 h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             
             {/* 페이지 타이틀 */}
             <div className="flex items-center gap-3 mb-8">
@@ -2901,7 +2843,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Action Buttons */}
           <div className="px-6 pb-6 space-y-3 border-t border-gray-800 pt-4">
             <button
-              onClick={() => setStep(8)}
+              onClick={() => {
+                alert('무제한 면접 AI 코칭 기능은 준비 중입니다.');
+              }}
               className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-4 px-4 rounded-xl font-medium transition-colors active:scale-95"
             >
               무제한 면접 코칭과 분석
@@ -2946,459 +2890,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 <button 
                   onClick={() => {
                     setShowSampleModal(false);
-                    setStep(7); // 실제 리포트 화면으로 이동
+                    setStep(0); // 메인으로 이동
                   }}
                   className="flex-1 bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
                   네, 받아볼래요
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Step 7: Analysis Report */}
-      {step === 7 && (
-        <div key="step-7" className="fixed inset-0 flex flex-col bg-black text-white animate-slideInRight z-50">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
-            <button 
-              onClick={() => setStep(5)} // 이전 화면으로 돌아가기
-              className="p-2 text-white hover:text-gray-300 transition-colors"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-
-            <div></div>
-            
-            <button className="p-2 text-white hover:text-gray-300 transition-colors">
-              <Image
-                src="/Icon_Presentation-chart-bar.svg"
-                alt="차트"
-                width={24}
-                height={24}
-                className="object-contain"
-              />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6 h-0">
-            
-            {isReportConditionMet() ? (
-              // 조건 충족 시: 실제 리포트 화면 (Sample 태그 제거)
-              <>
-                {/* 페이지 타이틀 */}
-                <div className="flex items-center gap-3 mb-8">
-                  <h1 className="text-[32px] font-bold text-white">면접 분석 리포트</h1>
-                  {/* Sample 태그 제거됨 */}
-                </div>
-                
-                {/* 평가 항목별 점수 테이블 */}
-                <div id="score-table" className="mb-8">
-                  <div className="rounded-2xl overflow-hidden border border-[#3D3D3D]">
-                    {/* Table Header */}
-                    <div className="grid grid-cols-3 bg-[#000000] text-white text-base font-medium py-4">
-                      <div className="px-6 text-left">평가 항목</div>
-                      <div className="px-6 text-center">배점</div>
-                      <div className="px-6 text-center">점수</div>
-                    </div>
-                    
-                    {/* Table Rows */}
-                    <div className="divide-y divide-[#3D3D3D]">
-                      <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
-                        <div className="px-6 text-white font-medium">전공 적합성</div>
-                        <div className="px-6 text-center text-white">30</div>
-                        <div className="px-6 text-center text-blue-500 font-bold text-xl">26</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
-                        <div className="px-6 text-white font-medium">학업 역량</div>
-                        <div className="px-6 text-center text-white">30</div>
-                        <div className="px-6 text-center text-blue-500 font-bold text-xl">28</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 items-center py-4 bg-[#222222] border-l border-r border-[#3D3D3D]">
-                        <div className="px-6 text-white font-medium">인성, 태도</div>
-                        <div className="px-6 text-center text-white">20</div>
-                        <div className="px-6 text-center text-blue-500 font-bold text-xl">18</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 items-center py-4 bg-[#121212] border-l border-r border-[#3D3D3D]">
-                        <div className="px-6 text-white font-medium">소통 능력</div>
-                        <div className="px-6 text-center text-white">20</div>
-                        <div className="px-6 text-center text-blue-500 font-bold text-xl">19</div>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 items-center py-4 bg-[#1A1A1A] border-l border-r border-[#3D3D3D]">
-                        <div className="px-6 text-yellow-400 font-bold text-lg">총점</div>
-                        <div className="px-6 text-center text-yellow-400 font-bold">100</div>
-                        <div className="px-6 text-center text-yellow-400 font-bold text-2xl">91</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 면접 통계 */}
-                <div className="mb-8">
-                  <h2 className="text-xl font-bold text-white mb-4">면접 통계</h2>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#1A1A1A] rounded-lg p-4 border border-[#3D3D3D]">
-                      <div className="text-gray-400 text-sm">면접 시간</div>
-                      <div className="text-white text-lg font-bold">{getInterviewDurationMinutes()}분</div>
-                    </div>
-                    <div className="bg-[#1A1A1A] rounded-lg p-4 border border-[#3D3D3D]">
-                      <div className="text-gray-400 text-sm">발화 문자 수</div>
-                      <div className="text-white text-lg font-bold">{getTotalSpeechCharacters().toLocaleString()}자</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 추가 분석 내용들 (Step 6과 동일) */}
-                <div className="space-y-8">
-                  {/* 여기에 더 많은 리포트 내용을 추가할 수 있습니다 */}
-                  <div className="bg-[#1A1A1A] rounded-lg p-6 border border-[#3D3D3D]">
-                    <h3 className="text-lg font-bold text-white mb-4">상세 분석</h3>
-                    <p className="text-gray-300 leading-relaxed">
-                      실제 면접 데이터를 기반으로 생성된 맞춤형 분석 리포트입니다.
-                      면접 시간 {getInterviewDurationMinutes()}분, 총 발화량 {getTotalSpeechCharacters()}자를 바탕으로
-                      종합적인 평가를 진행했습니다.
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              // 조건 미충족 시: Empty 화면 (카드형 디자인)
-              <div className="min-h-full">
-                {/* 페이지 타이틀 (조건 충족 화면과 동일) */}
-                <div className="flex items-center gap-3 mb-8">
-                  <h1 className="text-[32px] font-bold text-white">면접 분석 리포트</h1>
-                </div>
-
-                <div className="w-full min-h-full rounded-2xl border border-[#3D3D3D] bg-[#101010] px-8 py-12 shadow-[0_10px_40px_rgba(0,0,0,0.6)]">
-                  <div className="flex flex-col items-center text-center">
-                    <div className="mb-6">
-                      <img
-                        src="/empty page_icon.svg"
-                        alt="빈 페이지"
-                        width="40"
-                        height="40"
-                        className="w-10 h-10 opacity-80 object-contain"
-                      />
-                    </div>
-
-                    <h2 className="text-[16px] leading-tight font-bold text-white mb-3">
-                      인터뷰 내용이 부족해<br />리포트 작성이 불가능해요
-                    </h2>
-
-                    <p className="text-gray-400 text-base">
-                      5분 이상 충분한 발화량이 확보되어야합니다.
-                    </p>
-
-                    <button
-                      onClick={() => setStep(6)}
-                      className="mt-6 inline-flex items-center justify-center px-5 py-3 rounded-lg font-medium transition-colors bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                    >
-                      샘플 리포트 보기
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-          </div>
-        </div>
-      )}
-      {/* Step 8: Premium Paywall */}
-      {step === 8 && (
-        <div key="step-8" className="fixed inset-0 flex flex-col bg-black text-white animate-slideInUp z-50">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-800">
-            <button 
-              onClick={() => setStep(6)}
-              className="p-2 text-white hover:text-gray-300 transition-colors"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <div></div>
-            <div className="w-10 h-10"></div>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-8">
-            {/* Logo */}
-                              <div className="flex justify-center mb-5">
-                    <Image
-                      src="/qanda-premium-logo.svg"
-                      alt="QandA Premium"
-                      width={100}
-                      height={20}
-                      className="object-contain h-5 w-auto"
-                    />
-                  </div>
-                  {/* Title */}
-                  <div className="text-center mb-2">
-                    <h1 className="text-[32px] font-bold text-white mb-4 leading-[1.2]">
-                      콴다 프리미엄으로<br />
-                      면접 합격의 문을 두드려요!
-                    </h1>
-                    <div className="relative">
-                      <div>
-                        <Image
-                          src="/circle.svg"
-                          alt="Circle"
-                          width={280}
-                          height={280}
-                          className="object-contain mx-auto"
-                        />
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Image
-                          src="/univ.svg"
-                          alt="University"
-                          width={300}
-                          height={300}
-                          className="object-contain w-[300px] h-auto"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Premium vs Free Table */}
-                  <div className="w-full rounded-2xl bg-[#1C1C1E] overflow-hidden mb-60 border border-[#3D3D3D]">
-                    {/* Header */}
-                    <div className="flex border-b border-[#3D3D3D]">
-                      <div className="w-[140px] p-4">
-                        <div className="text-[15px]">혜택</div>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D]">
-                        <div className="text-[#3B82F6] text-[15px] text-center">프리미엄 구독</div>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D]">
-                        <div className="text-[#86868B] text-[15px] text-center">미구독</div>
-                      </div>
-                    </div>
-
-                    {/* Row: 면접 AI */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#121212]">
-                      <div className="w-[140px] p-4 flex items-center">
-                        <Image
-                          src="/new.svg"
-                          alt="New"
-                          width={20}
-                          height={20}
-                          className="mr-2"
-                        />
-                        <span className="text-[15px]">면접 AI</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <span className="text-[#3B82F6] text-[15px]">무제한</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <span className="text-[15px] text-[#86868B]">1회 제한</span>
-                      </div>
-                    </div>
-
-                    {/* Row: 면접 리포트 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#222222]">
-                      <div className="w-[140px] p-4 flex items-center">
-                        <Image
-                          src="/new.svg"
-                          alt="New"
-                          width={20}
-                          height={20}
-                          className="mr-2"
-                        />
-                        <span className="text-[15px]">면접 리포트</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_O-color.svg"
-                          alt="가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_X-color.svg"
-                          alt="불가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row: AI 질문 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#121212]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">AI 질문</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <div className="text-[#3B82F6] text-[15px] leading-[22px] text-center">무제한 질문<br/>더 똑똑한 문제 풀이</div>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <span className="text-[15px] text-[#86868B]">제한된 질문 갯수</span>
-                      </div>
-                    </div>
-
-                    {/* Row: 동영상 풀이 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#222222]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">동영상 풀이</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_O-color.svg"
-                          alt="가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_X-color.svg"
-                          alt="불가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row: 퀴즈 만들기 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#121212]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">퀴즈 만들기</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_O-color.svg"
-                          alt="가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_X-color.svg"
-                          alt="불가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row: 내 풀이 점수 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#222222]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">내 풀이 점수</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_O-color.svg"
-                          alt="가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_X-color.svg"
-                          alt="불가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Row: 1:1 선생님 질문 */}
-                    <div className="flex border-b border-[#3D3D3D] bg-[#121212]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">1:1 선생님 질문</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <div className="text-[#3B82F6] text-[15px] leading-[22px] text-center">10,000코인<br/>지급</div>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <span className="text-[15px] text-[#86868B]">코인 결제 이용</span>
-                      </div>
-                    </div>
-
-                    {/* Row: 광고 없는 검색 */}
-                    <div className="flex bg-[#222222]">
-                      <div className="w-[140px] p-4">
-                        <span className="text-[15px]">광고 없는 검색</span>
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_O-color.svg"
-                          alt="가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                      <div className="flex-1 p-4 border-l border-[#3D3D3D] flex items-center justify-center">
-                        <Image
-                          src="/Icon_X-color.svg"
-                          alt="불가능"
-                          width={18}
-                          height={18}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Main CTA */}
-                  <div className="fixed bottom-0 left-6 right-6">
-                    <div className="bg-[#000000] p-6 -mx-6 border-t border-[#3D3D3D]">
-                      <button
-                        onClick={() => setShowPremiumModal(true)}
-                        className="w-full h-[52px] bg-[#FF5500] text-white rounded-xl text-[17px] font-bold
-                                 hover:opacity-90 active:scale-[0.98] transition-all duration-200 mb-2"
-                      >
-                        프리미엄 이용하기
-                      </button>
-                      <div className="text-center text-[15px] text-[#86868B]">
-                        매월 18,500원
-                      </div>
-                    </div>
-                  </div>
-          </div>
-        </div>
-      )}
-
-      {/* Premium Success Modal */}
-      {showPremiumModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-[#2A2A2A] border border-[#525252] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
-            <div className="text-center">
-              {/* Mic Icon */}
-              <div className="flex justify-center mb-4">
-                <Image 
-                  src="/mic-on.svg" 
-                  alt="마이크" 
-                  width={72} 
-                  height={72}
-                  className="object-contain"
-                />
-              </div>
-              
-              <h3 className="text-white text-lg font-bold mb-6">프리미엄 멤버쉽을 준비 중이에요. 곧 만나요!</h3>
-              
-              <button
-                onClick={() => {
-                  setShowPremiumModal(false);
-                }}
-                className="w-full bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
-              >
-                확인
-              </button>
             </div>
           </div>
         </div>

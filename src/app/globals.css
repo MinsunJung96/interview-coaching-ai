@@ -41,6 +41,57 @@ body {
   animation: fadeIn 0.5s ease-in-out;
 }
 
+/* Slide Up Animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Circle and Univ Slide In Animation */
+@keyframes circleSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-circleSlideIn {
+  animation: circleSlideIn 0.5s ease-out;
+  animation-delay: 0.2s;
+  animation-fill-mode: both;
+}
+
+@keyframes univSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-univSlideIn {
+  animation: univSlideIn 0.5s ease-out;
+  animation-delay: 0.7s; /* circle 0.2s + 0.5s + 추가 0.5s 대기 */
+  animation-fill-mode: both;
+}
+
 /* Animation delay classes */
 .animation-delay-1000 {
   animation-delay: 1000ms;
@@ -221,4 +272,113 @@ body {
 
 .animate-bounce {
   animation: bounce 1s infinite;
+}
+
+/* ===== 전역 페이지 전환 애니메이션 ===== */
+
+/* Page transition timing function */
+:root {
+  --page-transition-timing: cubic-bezier(.22,.61,.36,1);
+  --page-transition-duration: 320ms;
+}
+
+/* 앞으로 이동: 오른쪽 → 왼쪽 슬라이드 인 + 페이드 인 */
+@keyframes pageSlideInForward {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOutForward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+
+/* 뒤로 이동: 왼쪽 → 오른쪽 슬라이드 인 + 페이드 인 */
+@keyframes pageSlideInBackward {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pageSlideOutBackward {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Utility classes for page transitions */
+.page-transition-enter-forward {
+  animation: pageSlideInForward var(--page-transition-duration) var(--page-transition-timing) both;
+}
+
+.page-transition-exit-forward {
+  animation: pageSlideOutForward var(--page-transition-duration) var(--page-transition-timing) both;
+}
+
+.page-transition-enter-backward {
+  animation: pageSlideInBackward var(--page-transition-duration) var(--page-transition-timing) both;
+}
+
+.page-transition-exit-backward {
+  animation: pageSlideOutBackward var(--page-transition-duration) var(--page-transition-timing) both;
+}
+
+/* Page transition container */
+.page-transition-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.page-transition-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter-forward,
+  .page-transition-exit-forward,
+  .page-transition-enter-backward,
+  .page-transition-exit-backward {
+    animation: none;
+    transition: opacity 150ms ease-in-out;
+  }
+  
+  .page-transition-enter-forward,
+  .page-transition-enter-backward {
+    opacity: 1;
+  }
+  
+  .page-transition-exit-forward,
+  .page-transition-exit-backward {
+    opacity: 0;
+  }
 }

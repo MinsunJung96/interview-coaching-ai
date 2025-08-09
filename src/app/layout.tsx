@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { PageTransitionWrapper } from "@/components/PageTransitionWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "면접코칭 AI",
   description: "대학 면접을 위한 AI 코칭 서비스",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -24,11 +31,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        {children}
+        <PageTransitionWrapper>
+          {children}
+        </PageTransitionWrapper>
       </body>
     </html>
   );
