@@ -540,14 +540,31 @@ function Home() {
     const recog = recognitionRef.current || recognition;
     if (!recog) {
       console.log(`[🎤${context}] recognition 객체가 없음`);
+      
+      // 브라우저 호환성 재확인
+      if (!checkSpeechRecognitionSupport()) {
+        console.log(`[🎤${context}] 브라우저가 음성 인식을 지원하지 않음`);
+        return false;
+      }
+      
       // recognition 객체가 없으면 초기화 시도
       if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
         console.log(`[🎤${context}] recognition 객체 재초기화 시도`);
         const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
         const newRecog = new SpeechRecognition();
-        newRecog.continuous = true;
+        
+        // 모바일 최적화 설정
+        newRecog.continuous = !isMobileDevice(); // 모바일에서는 continuous false 권장
         newRecog.interimResults = true;
         newRecog.lang = 'ko-KR';
+        newRecog.maxAlternatives = 1;
+        
+        // 모바일에서는 더 긴 timeout 설정
+        if (isMobileDevice()) {
+          // @ts-ignore
+          newRecog.serviceURI = 'wss://www.google.com/speech-api/v2/recognize';
+        }
+        
         recognitionRef.current = newRecog;
         setRecognition(newRecog);
         // 재귀 호출하여 다시 시도
@@ -1348,16 +1365,75 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     };
   }, []);
 
+  // 모바일 환경 감지
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
+  // 브라우저 호환성 체크
+  const checkSpeechRecognitionSupport = () => {
+    const isMobile = isMobileDevice();
+    const hasWebkit = 'webkitSpeechRecognition' in window;
+    const hasStandard = 'SpeechRecognition' in window;
+    
+    console.log('음성 인식 호환성 체크:', {
+      isMobile,
+      hasWebkit,
+      hasStandard,
+      userAgent: navigator.userAgent
+    });
+    
+    if (isMobile) {
+      // iOS에서는 Safari 최신 버전만 제한적 지원
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+      
+      if (isiOS && !isSafari) {
+        console.warn('iOS에서는 Safari 브라우저 사용을 권장합니다.');
+        return false;
+      }
+    }
+    
+    return hasWebkit || hasStandard;
+  };
+
   // 마이크 권한 요청 및 음성 레벨 감지 설정
   const requestMicrophonePermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // HTTPS 체크
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        console.error('HTTPS가 필요합니다.');
+        alert('음성 인식을 위해서는 HTTPS 연결이 필요합니다.');
+        return false;
+      }
+
+      // 브라우저 지원 체크
+      if (!checkSpeechRecognitionSupport()) {
+        console.error('이 브라우저는 음성 인식을 지원하지 않습니다.');
+        alert('죄송합니다. 이 브라우저에서는 음성 인식이 지원되지 않습니다.\n모바일에서는 Safari(iOS) 또는 Chrome(Android)을 사용해주세요.');
+        return false;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 44100
+        } 
+      });
       console.log('마이크 권한 허용됨');
       
       // 음성 레벨 감지를 위한 Audio Context 설정
       if (!audioContext && typeof window !== 'undefined') {
         const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
         const context = new AudioContextClass();
+        
+        // 모바일에서 AudioContext 활성화
+        if (context.state === 'suspended') {
+          await context.resume();
+        }
+        
         const analyserNode = context.createAnalyser();
         analyserNode.fftSize = 256;
         
@@ -1370,14 +1446,23 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         
         // 음성 레벨 모니터링 시작
         startAudioLevelMonitoring(analyserNode);
-        
-
       }
       
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('마이크 권한 거부됨:', error);
-      alert('마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.');
+      
+      let errorMessage = '마이크 권한이 필요합니다.';
+      
+      if (error.name === 'NotAllowedError') {
+        errorMessage = '마이크 권한이 거부되었습니다. 브라우저 설정에서 마이크 권한을 허용해주세요.';
+      } else if (error.name === 'NotFoundError') {
+        errorMessage = '마이크를 찾을 수 없습니다. 마이크가 연결되어 있는지 확인해주세요.';
+      } else if (error.name === 'NotSupportedError') {
+        errorMessage = '이 브라우저에서는 마이크 사용이 지원되지 않습니다.';
+      }
+      
+      alert(errorMessage);
       return false;
     }
   };
@@ -1403,9 +1488,16 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   };
 
   const toggleMic = async () => {
+    const isMobile = isMobileDevice();
+    
     if (!isMicOn && !isListening) {
       // 마이크 켜기 - 음성 인식 시작
-      console.log('마이크 켜기 시도');
+      console.log('마이크 켜기 시도 (모바일:', isMobile, ')');
+      
+      // 모바일에서는 사용자 상호작용이 필요함을 알림
+      if (isMobile) {
+        console.log('모바일 환경에서 마이크 켜기 시도');
+      }
       
       // 마이크 권한 확인
       const hasPermission = await requestMicrophonePermission();
@@ -1414,22 +1506,34 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       }
       
       setIsMicOn(true);
-      const started = startRecognitionSafely('마이크 버튼 클릭');
-      if (!started && !recognition) {
-        console.error('음성 인식 객체가 없습니다.');
-      }
+      
+      // 모바일에서는 약간의 지연 후 시작
+      const delay = isMobile ? 500 : 100;
+      setTimeout(() => {
+        const started = startRecognitionSafely('마이크 버튼 클릭');
+        if (!started && !recognition) {
+          console.error('음성 인식 객체가 없습니다.');
+          setIsMicOn(false); // 실패 시 마이크 상태 되돌리기
+        }
+      }, delay);
+      
     } else if (isMicOn && isListening) {
       // 마이크 끄기 - 음성 인식 중지
       console.log('마이크 끄기 시도');
       setIsMicOn(false);
-      if (recognition) {
+      
+      const recog = recognitionRef.current || recognition;
+      if (recog) {
         try {
-          recognition.stop();
+          recog.stop();
           console.log('음성 인식 중지됨');
         } catch (error) {
           console.error('음성 인식 중지 실패:', error);
         }
       }
+      
+      setIsListening(false);
+      setIsRecognitionActive(false);
     }
   };
 
@@ -2031,7 +2135,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             
             {/* Title */}
             <div className="mb-4">
-              <h1 className="text-4xl font-bold text-white leading-tight">
+              <h1 className="text-[32px] font-bold text-white leading-tight">
                 <span className="inline-flex">
                   <span className="transform transition-all duration-200">
                     {digitAnimations.thousands}
@@ -2047,17 +2151,18 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                     {digitAnimations.ones}
                   </span>
                 </span>
-                명 선생님들의<br />
-                학습한 AI 모의 면접
+                명 선생님의<br />
+                실제 경험을 학습한<br />
+                AI 모의 면접
               </h1>
             </div>
             
             {/* Features List */}
             <div className="space-y-1 mb-12">
               {[
-                "실제 면접 질문 데이터를 바탕으로 진행해요",
-                "면접 분석 리포트를 받을 수 있어요", 
-                "평균 합격 점수와 내 점수를 비교해보세요"
+                "실제 면접 질문 데이터 반영",
+                "면접 분석 리포트와 개선된 답변 제안", 
+                "평균 합격 점수와 내 점수 비교"
               ].map((text, index) => {
                 const isActive = activeListItems.includes(index);
                 return (
@@ -2479,6 +2584,17 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       <span className="text-purple-400 text-sm font-medium animate-bounce">
                         당신의 차례입니다!
                       </span>
+                    </div>
+                  )}
+                  
+                  {/* 모바일 브라우저 호환성 알림 */}
+                  {typeof window !== 'undefined' && isMobileDevice() && !checkSpeechRecognitionSupport() && (
+                    <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-80 max-w-sm">
+                      <div className="bg-yellow-900/80 border border-yellow-600 rounded-lg p-3 text-center">
+                        <p className="text-yellow-200 text-xs">
+                          모바일에서는 Safari(iOS) 또는 Chrome(Android)을 사용해주세요
+                        </p>
+                      </div>
                     </div>
                   )}
                 </div>
