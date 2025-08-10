@@ -1521,7 +1521,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   // Step 0 애니메이션 효과 및 스크롤 제어
   useEffect(() => {
     if (step === 0 && isClient) {
-      console.log('Step 0 useEffect 시작 - isClient:', isClient);
+      console.log('Step 0 useEffect 시작 - isClient:', isClient, 'step:', step);
       
       // Welcome 화면에서 스크롤 막기
       document.body.style.overflow = 'hidden';
@@ -1532,79 +1532,85 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       setActiveListItems([]);
       setIsTeachersVisible(false);
       
-      // 약간의 지연을 두어 상태 변경이 확실히 적용되도록 함
-      setTimeout(() => {
-        console.log('애니메이션 상태 초기화 완료, 애니메이션 시작');
-      }, 50);
-
-      // 배경 이미지 페이드인 (다음 프레임에서 시작)
-      const fadeInTimeout = setTimeout(() => {
-        console.log('Teachers fade in 실행');
-        setIsTeachersVisible(true);
-      }, 200);
-
-      // 숫자 카운트업 애니메이션 (즉시 시작)
+      // 타이머 ID들을 저장할 변수들
+      let fadeInTimeout: NodeJS.Timeout;
+      let digitTimeout: NodeJS.Timeout;
       let countInterval: NodeJS.Timeout;
-      const digitTimeout = setTimeout(() => {
-        console.log('숫자 애니메이션 시작');
-        const targetDigits = { thousands: 3, hundreds: 7, tens: 8, ones: 0 };
-        const duration = 1000; // 1초
-        const steps = 60; // 60 프레임
-        const stepDuration = duration / steps;
+      let listTimeout1: NodeJS.Timeout;
+      let listTimeout2: NodeJS.Timeout;
+      let listTimeout3: NodeJS.Timeout;
 
-        let currentStep = 0;
-        countInterval = setInterval(() => {
-          currentStep++;
-          const progress = currentStep / steps;
-          
-          setDigitAnimations({
-            thousands: Math.floor(targetDigits.thousands * progress),
-            hundreds: Math.floor(targetDigits.hundreds * progress),
-            tens: Math.floor(targetDigits.tens * progress),
-            ones: Math.floor(targetDigits.ones * progress)
-          });
+      // 강제로 한 프레임 지연 후 애니메이션 시작
+      requestAnimationFrame(() => {
+        console.log('requestAnimationFrame: 애니메이션 시작 준비');
 
-          if (currentStep >= steps) {
-            clearInterval(countInterval);
-            setDigitAnimations(targetDigits);
-            console.log('숫자 애니메이션 완료');
-          }
-        }, stepDuration);
-      }, 100);
+        // 배경 이미지 페이드인 (다음 프레임에서 시작)
+        fadeInTimeout = setTimeout(() => {
+          console.log('Teachers fade in 실행');
+          setIsTeachersVisible(true);
+        }, 200);
 
-      // 리스트 아이템 순차 활성화 (숫자 애니메이션 완료 후 더 빠르게)
-      const listTimeout1 = setTimeout(() => {
-        console.log('Activating list item 0');
-        setActiveListItems([0]);
-      }, 1400);
+        // 숫자 카운트업 애니메이션 (즉시 시작)
+        digitTimeout = setTimeout(() => {
+          console.log('숫자 애니메이션 시작');
+          const targetDigits = { thousands: 3, hundreds: 7, tens: 8, ones: 0 };
+          const duration = 1000; // 1초
+          const steps = 60; // 60 프레임
+          const stepDuration = duration / steps;
 
-      const listTimeout2 = setTimeout(() => {
-        console.log('Activating list items 0, 1');
-        setActiveListItems([0, 1]);
-      }, 1800);
+          let currentStep = 0;
+          countInterval = setInterval(() => {
+            currentStep++;
+            const progress = currentStep / steps;
+            
+            setDigitAnimations({
+              thousands: Math.floor(targetDigits.thousands * progress),
+              hundreds: Math.floor(targetDigits.hundreds * progress),
+              tens: Math.floor(targetDigits.tens * progress),
+              ones: Math.floor(targetDigits.ones * progress)
+            });
 
-      const listTimeout3 = setTimeout(() => {
-        console.log('Activating list items 0, 1, 2');
-        setActiveListItems([0, 1, 2]);
-      }, 2200);
+            if (currentStep >= steps) {
+              clearInterval(countInterval);
+              setDigitAnimations(targetDigits);
+              console.log('숫자 애니메이션 완료');
+            }
+          }, stepDuration);
+        }, 100);
 
-      // 클린업 함수
+        // 리스트 아이템 순차 활성화 (숫자 애니메이션 완료 후 더 빠르게)
+        listTimeout1 = setTimeout(() => {
+          console.log('Activating list item 0');
+          setActiveListItems([0]);
+        }, 1400);
+
+        listTimeout2 = setTimeout(() => {
+          console.log('Activating list items 0, 1');
+          setActiveListItems([0, 1]);
+        }, 1800);
+
+        listTimeout3 = setTimeout(() => {
+          console.log('Activating list items 0, 1, 2');
+          setActiveListItems([0, 1, 2]);
+        }, 2200);
+      });
+
+      // 클린업 함수 - 모든 타이머와 인터벌 정리
       return () => {
-        clearTimeout(fadeInTimeout);
-        clearTimeout(digitTimeout);
-        clearTimeout(listTimeout1);
-        clearTimeout(listTimeout2);
-        clearTimeout(listTimeout3);
-        if (countInterval) {
-          clearInterval(countInterval);
-        }
-        console.log('Step 0 useEffect 클린업');
+        if (fadeInTimeout) clearTimeout(fadeInTimeout);
+        if (digitTimeout) clearTimeout(digitTimeout);
+        if (countInterval) clearInterval(countInterval);
+        if (listTimeout1) clearTimeout(listTimeout1);
+        if (listTimeout2) clearTimeout(listTimeout2);
+        if (listTimeout3) clearTimeout(listTimeout3);
+        
+        console.log('Step 0 useEffect 클린업 완료');
       };
     } else {
       // Welcome 화면이 아닐 때 스크롤 복원
       document.body.style.overflow = 'unset';
     }
-  }, [step, isClient]);
+  }, [step, isClient]); // step 변경 시마다 실행
 
   // (이전) Step 3 리셋 useEffect는 위 카운트다운 effect에 통합됨
 
@@ -2327,17 +2333,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Header Gradient Overlay for Readability */}
           <div className="fixed top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
           
-          {/* Voice Level Gradient Overlay (마이크 ON 상태일 때만) */}
-          {isMicOn && !isInterviewerSpeaking && (
-            <div 
-              className="fixed bottom-0 left-0 right-0 transition-all duration-150 ease-out z-15 pointer-events-none"
-              style={{
-                // Map audioLevel [0,255] to heightPercent [20,40]
-                height: `${20 + ((audioLevel / 255) * 20)}%`,
-                background: 'linear-gradient(to top, rgba(255, 85, 0, 0.5) 0%, transparent 100%)',
-              }}
-            />
-          )}
+          {/* Voice Level Gradient Overlay 제거됨 */}
           
           {/* Main Interview Content Area */}
           <div className="flex-1 relative z-10">
@@ -2514,10 +2510,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 const isUser = item.message.startsWith('사용자:');
                 // "면접관: " 또는 "사용자: " 제거 (공백 포함)
                 const messageText = item.message.startsWith('면접관:') ? item.message.substring(4) : item.message.startsWith('사용자:') ? item.message.substring(4) : item.message;
-                // 실제 경과 시간을 분:초 형식으로 변환
-                const elapsedMinutes = Math.floor(item.timestamp / 60);
-                const elapsedSeconds = item.timestamp % 60;
-                const timestamp = `${elapsedMinutes}:${elapsedSeconds.toString().padStart(2, '0')}`;
+
                 
                 return (
                   <div 
@@ -2530,9 +2523,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                         {messageText}
                       </div>
                     </div>
-                    <div className={`flex items-end mx-2 ${isInterviewer ? 'order-2' : 'order-1'}`}>
-                      <span className="text-xs text-gray-400">{timestamp}</span>
-                    </div>
+
                   </div>
                 );
               })
@@ -3401,19 +3392,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-[#2A2A2A] border border-[#525252] rounded-2xl p-6 max-w-md w-full mx-4 animate-fadeIn">
             <div className="text-center">
-              {/* Warning Icon */}
-              <div className="flex justify-center mb-4">
-                <Image 
-                  src="/Icon_Warning_Fill.svg" 
-                  alt="경고" 
-                  width={72} 
-                  height={72}
-                  className="object-contain"
-                />
-              </div>
               
-              <h3 className="text-white text-lg font-bold mb-2">잠깐!</h3>
-              <p className="text-gray-300 text-lg mb-6">지금 나가시면 내용은 저장되지 않습니다.</p>
+              <p className="text-gray-300 text-lg mb-6">지금 나가시면 분석 리포트를 받을 수 없어요!</p>
               
               <div className="flex space-x-3">
                 <button 
