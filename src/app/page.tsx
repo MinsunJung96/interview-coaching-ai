@@ -1716,6 +1716,16 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   }, [step, isClient]); // step 변경 시마다 실행
 
+  // Step 5 (면접 완료 화면) 스크롤 보장
+  useEffect(() => {
+    if (step === 5 && isClient) {
+      // 면접 완료 화면에서는 반드시 스크롤 허용
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      console.log('Step 5: 스크롤 활성화');
+    }
+  }, [step, isClient]);
+
   // (이전) Step 3 리셋 useEffect는 위 카운트다운 effect에 통합됨
 
 
@@ -2615,10 +2625,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 5: Interview Completion */}
       {step === 5 && (
-        <div key="step-5" className={getStepClassName("flex-1 flex flex-col bg-black text-white relative")}>
+        <div key="step-5" className={getStepClassName("flex-1 flex flex-col bg-black text-white relative h-screen")}>
 
           {/* Chat History */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32" style={{ 
+            height: 'calc(100vh - 140px)', 
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehavior: 'contain'
+          }}>
 
             {conversationHistory.length > 0 ? (
               conversationHistory.map((item, index) => {
@@ -2654,7 +2668,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* Action Buttons - Fixed at bottom */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black">
+          <div className="fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black z-10" style={{ height: '140px' }}>
             <button
               onClick={() => {
                 setStep(6); // 분석 리포트 화면으로 이동
