@@ -1988,7 +1988,12 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
   // 클라이언트에서만 렌더링 (Hydration 에러 방지)
   if (!isClient) {
-    return null; // SSR 시에는 아무것도 렌더링하지 않음
+    // SSR 단계에서는 간단한 로딩 화면을 렌더링하여 404 템플릿과의 병행 스트리밍을 방지
+    return (
+      <div className="bg-black text-white min-h-screen flex items-center justify-center">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    );
   }
 
   return (
