@@ -342,16 +342,7 @@ function Home() {
       isSlideInRight ? `${baseClasses} animate-slideInRight` :
       baseClasses;
     
-    // 디버깅용 로그
-    if (isSlideOutLeft || isSlideOutRight || isSlideInLeft || isSlideInRight) {
-      console.log('🎬 Animation State:', {
-        isSlideOutLeft,
-        isSlideOutRight, 
-        isSlideInLeft,
-        isSlideInRight,
-        result
-      });
-    }
+
     
     return result;
   };
