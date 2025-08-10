@@ -16,6 +16,43 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "면접코칭 AI",
   description: "대학 면접을 위한 AI 코칭 서비스",
+  keywords: ["면접", "AI", "코칭", "대학 면접", "모의 면접", "인공지능", "면접 준비"],
+  authors: [{ name: "면접코칭 AI" }],
+  creator: "면접코칭 AI",
+  publisher: "면접코칭 AI",
+  openGraph: {
+    title: "면접코칭 AI",
+    description: "대학 면접을 위한 AI 코칭 서비스",
+    images: [
+      {
+        url: "/OG.png",
+        width: 1200,
+        height: 630,
+        alt: "면접코칭 AI - 대학 면접을 위한 AI 코칭 서비스",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+    siteName: "면접코칭 AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "면접코칭 AI",
+    description: "대학 면접을 위한 AI 코칭 서비스",
+    images: ["/OG.png"],
+    creator: "@interview_ai",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport: Viewport = {
