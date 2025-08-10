@@ -625,7 +625,7 @@ function Home() {
         
         // 기본 이벤트 핸들러 설정
         recog.onstart = () => {
-          console.log('✅ 음성 인식 시작됨!');
+          console.log('Speech recognition started');
           setIsListening(true);
           setIsRecognitionActive(true);
           setInterviewStatus('listening');
@@ -633,7 +633,7 @@ function Home() {
         };
         
         recog.onresult = (event: any) => {
-          console.log('🎤 음성 인식 결과 받음');
+          console.log('Speech recognition result received');
           let finalTranscript = '';
           let interimTranscript = '';
           
@@ -647,12 +647,12 @@ function Home() {
           }
           
           if (interimTranscript) {
-            console.log('임시:', interimTranscript);
-            setInterimTranscript(interimTranscript);
-          }
-          
-          if (finalTranscript) {
-            console.log('최종:', finalTranscript);
+                      console.log('Interim:', interimTranscript);
+          setInterimTranscript(interimTranscript);
+        }
+        
+        if (finalTranscript) {
+          console.log('Final:', finalTranscript);
             setInterimTranscript('');
             // 1.5초 후 처리
             setTimeout(() => {
@@ -664,13 +664,13 @@ function Home() {
         };
         
         recog.onerror = (event: any) => {
-          console.error('❌ 음성 인식 에러:', event.error);
+          console.error('Speech recognition error:', event.error);
           setIsListening(false);
           setIsRecognitionActive(false);
         };
         
         recog.onend = () => {
-          console.log('🔚 음성 인식 종료');
+          console.log('Speech recognition ended');
           setIsListening(false);
           setIsRecognitionActive(false);
         };
@@ -736,7 +736,7 @@ function Home() {
       corrected = corrected.replace(/고려|고려대학/g, '고려대학교');
     }
     
-    console.log(`음성 인식 보정: "${text}" -> "${corrected}"`);
+    console.log(`Speech correction: "${text}" -> "${corrected}"`);
     return corrected;
   };
   
@@ -744,13 +744,13 @@ function Home() {
   const handleUserResponse = async (userInput: string) => {
     // 이미 처리 중이면 무시
     if (isProcessingResponse) {
-      console.log('이미 응답 처리 중, 무시됨');
+      console.log('Already processing response, ignored');
       return;
     }
     
     // 빈 입력이거나 너무 짧으면 알림 표시
     if (!userInput || userInput.trim().length < 2) {
-      console.log('입력이 너무 짧음, 무시됨');
+      console.log('Input too short, ignored');
           // setStatusMessage('응답이 잘 기록되지 않았습니다. 다시 말씀해주세요.');
     // setTimeout(() => setStatusMessage(''), 3000);
       
