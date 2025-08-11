@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'tts-1-hd', // 고품질 음성 사용
+        model: 'gpt-4o-mini-tts', // 보다 지능적인 TTS 모델 사용
         input: text,
         voice: 'nova', // nova: 따뜻하고 친근한 여성 목소리 (면접관에 적합)
         response_format: 'mp3',
