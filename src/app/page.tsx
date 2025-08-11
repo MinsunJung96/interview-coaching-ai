@@ -2508,7 +2508,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Voice Level Gradient Overlay 제거됨 */}
           
           {/* Main Interview Content Area */}
-          <div className="flex-1 relative z-10">
+          <div className="flex-1 relative z-10 overflow-hidden">
             
           {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
@@ -2627,7 +2627,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
               </div> */}
               
               {/* Microphone Button with User Turn Indicator */}
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+              <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30 pointer-events-auto">
                 <div className="relative">
                   {/* 사용자 차례 표시 애니메이션 */}
                   {interviewStatus === 'user_turn' && (
