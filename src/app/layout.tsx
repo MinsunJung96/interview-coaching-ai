@@ -18,6 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Ensure absolute URLs for Open Graph/Twitter images
+  metadataBase: new URL('https://interview-coaching.vercel.app'),
   title: "면접코칭 AI",
   description: "대학 면접을 위한 AI 코칭 서비스",
   keywords: ["면접", "AI", "코칭", "대학 면접", "모의 면접", "인공지능", "면접 준비"],
