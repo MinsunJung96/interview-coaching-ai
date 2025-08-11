@@ -1207,7 +1207,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     }
   };
 
-  // 음성 인식 초기화
+  // 음성 인식 초기화 (웹 Speech 지원 시)
   useEffect(() => {
     if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
@@ -1343,7 +1343,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       setRecognition(recognition);
       recognitionRef.current = recognition; // ref에도 저장
     } else {
-      console.error('Speech Recognition API가 지원되지 않습니다.');
+      console.warn('Speech Recognition API 미지원 환경 - iOS Safari 등에서는 서버 STT로 폴백합니다.');
     }
     
     // useEffect cleanup - 컴포넌트 언마운트시 정리
@@ -1351,6 +1351,49 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       completeAudioCleanup();
     };
   }, []);
+
+  // iOS Safari 등 Web Speech 미지원 시 서버 STT 폴백 업로더
+  const uploadBlobToServerSTT = async (blob: Blob): Promise<string> => {
+    const formData = new FormData();
+    formData.append('audio', blob, 'speech.webm');
+    const res = await fetch('/api/stt', { method: 'POST', body: formData });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error('Server STT failed: ' + txt);
+    }
+    const data = await res.json();
+    return data.transcript as string;
+  };
+
+  // 미지원 브라우저용: 마이크에서 잠시 녹음 후 서버로 전송
+  const recordOnceAndTranscribe = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      const chunks: BlobPart[] = [];
+      return await new Promise<string>((resolve, reject) => {
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+        mediaRecorder.onstop = async () => {
+          try {
+            const blob = new Blob(chunks, { type: 'audio/webm' });
+            const text = await uploadBlobToServerSTT(blob);
+            resolve(text);
+          } catch (err) {
+            reject(err);
+          } finally {
+            stream.getTracks().forEach(t => t.stop());
+          }
+        };
+        mediaRecorder.start();
+        // 4초만 녹음 후 정지
+        setTimeout(() => mediaRecorder.stop(), 4000);
+      });
+    } catch (e) {
+      throw e;
+    }
+  };
 
   // 마이크 권한 요청 및 음성 레벨 감지 설정
   const requestMicrophonePermission = async () => {
@@ -1416,11 +1459,29 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       if (!hasPermission) {
         return;
       }
-      
       setIsMicOn(true);
-      const started = startRecognitionSafely('마이크 버튼 클릭');
-      if (!started && !recognition) {
-        console.error('음성 인식 객체가 없습니다.');
+      // Web Speech 지원 시: 기존 흐름
+      if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+        const started = startRecognitionSafely('마이크 버튼 클릭');
+        if (!started && !recognition) {
+          console.error('음성 인식 객체가 없습니다.');
+        }
+      } else {
+        // 미지원(iOS Safari 등): 짧게 녹음 후 서버 STT로 전송
+        try {
+          setIsListening(true);
+          const text = await recordOnceAndTranscribe();
+          setIsListening(false);
+          if (text && text.trim()) {
+            await handleUserResponse(text.trim());
+          } else {
+            console.log('서버 STT 결과가 비어 있음');
+          }
+        } catch (e) {
+          setIsListening(false);
+          console.error('서버 STT 에러:', e);
+          alert('음성 인식이 이 브라우저에서 직접 지원되지 않아 서버로 전송했지만 실패했습니다.');
+        }
       }
     } else if (isMicOn && isListening) {
       // 마이크 끄기 - 음성 인식 중지
