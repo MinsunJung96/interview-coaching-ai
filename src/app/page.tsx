@@ -1591,6 +1591,11 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   useEffect(() => {
     let timer: NodeJS.Timeout;
     
+    if (step === 3 && isClient) {
+      // 대기 화면에서는 스크롤 막고 CTA는 bottom fixed
+      document.body.style.overflow = 'hidden';
+    }
+
     if (step === 3 && countdown > 0 && isClient) {
       timer = setInterval(() => {
         setCountdown((prev) => {
@@ -1605,6 +1610,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     
     return () => {
       if (timer) clearInterval(timer);
+      if (step === 3) {
+        // 다른 스텝으로 이동 시 스크롤 원복
+        document.body.style.overflow = '';
+      }
     };
   }, [step, countdown, isClient]);
 
@@ -2383,7 +2392,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 3: Waiting Room */}
       {step === 3 && (
-        <div key="step-3" className={getStepClassName("flex-1 flex flex-col relative")}>
+        <div key="step-3" className={getStepClassName("flex-1 flex flex-col relative min-h-screen overflow-hidden")}> 
           {/* Full-screen Background Image */}
           <div 
             className="fixed inset-0 bg-cover bg-center z-0"
@@ -2396,7 +2405,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           <div className="fixed top-0 left-0 right-0 h-24 bg-gradient-to-b from-black/80 via-black/40 to-transparent z-25 pointer-events-none"></div>
 
           {/* Content */}
-          <div className="relative z-10 w-full pt-8 px-6">
+          <div className="relative z-10 w-full pt-8 px-6 h-[calc(100vh-112px)] overflow-hidden">
             <h1 className="text-[28px] font-bold leading-relaxed text-left">
               <span className="animate-slide-in-1">
                 면접관 님이<br />
@@ -2411,7 +2420,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           </div>
 
           {/* New CTA Button */}
-          <div className="absolute bottom-8 left-6 right-6">
+          <div className="fixed bottom-8 left-6 right-6 z-20">
             <button
               disabled={!isTimerComplete}
               onClick={handleNextStep}
