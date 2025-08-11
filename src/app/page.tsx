@@ -1432,8 +1432,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           }
         };
         mediaRecorder.start();
-        // 4초만 녹음 후 정지
-        setTimeout(() => mediaRecorder.stop(), 4000);
+        // 2초만 녹음 후 정지
+        setTimeout(() => mediaRecorder.stop(), 2000);
       });
     } catch (e) {
       throw e;
