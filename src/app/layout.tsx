@@ -3,6 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { PageTransitionWrapper } from "@/components/PageTransitionWrapper";
 
+// Force dynamic rendering in production to avoid stale static cache on Vercel
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
