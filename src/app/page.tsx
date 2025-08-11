@@ -195,6 +195,9 @@ function Home() {
   const [isProcessingResponse, setIsProcessingResponse] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
+  
+  // 고정된 TTS 음성 저장
+  const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
 
   const [interviewStatus, setInterviewStatus] = useState<'waiting' | 'listening' | 'processing' | 'speaking' | 'user_turn'>('waiting');
 
@@ -434,7 +437,7 @@ function Home() {
       console.log('[CLEANUP] HTML Audio 엘리먼트 중단');
     });
     
-    // 1. 음성 인식 정리
+    // 1. 음성 인식 완전 중단 및 정리
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -1130,14 +1133,28 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         utterance.pitch = 0.85; // 약간 낮은 톤으로 신뢰감 있게
         utterance.volume = 0.9; // 적당한 볼륨
         
-        // 한국어 음성 중 더 자연스러운 음성 선택
-        const voices = speechSynthesis.getVoices();
-        const koreanVoice = voices.find(voice => 
-          voice.lang.includes('ko') && 
-          (voice.name.includes('Google') || voice.name.includes('Samsung') || voice.name.includes('Apple'))
-        );
-        if (koreanVoice) {
-          utterance.voice = koreanVoice;
+        // 고정된 음성 사용 (한 번 선택하면 계속 사용)
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        } else {
+          // 처음에만 음성 선택
+          const voices = speechSynthesis.getVoices();
+          // 우선순위: 1. Google 여성 2. Samsung 여성 3. Apple 여성 4. 기타 한국어 여성
+          const koreanVoice = voices.find(voice => 
+            voice.lang.includes('ko') && 
+            voice.name.toLowerCase().includes('female')
+          ) || voices.find(voice => 
+            voice.lang.includes('ko') && 
+            (voice.name.includes('Google') || voice.name.includes('지수') || voice.name.includes('유나'))
+          ) || voices.find(voice => 
+            voice.lang.includes('ko')
+          );
+          
+          if (koreanVoice) {
+            utterance.voice = koreanVoice;
+            setSelectedVoice(koreanVoice); // 음성 저장
+            console.log('선택된 TTS 음성:', koreanVoice.name);
+          }
         }
         
         utterance.onstart = () => {
@@ -1225,6 +1242,34 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       }
     }
   };
+
+  // TTS 음성 목록 미리 로드
+  useEffect(() => {
+    if ('speechSynthesis' in window) {
+      // 음성 목록 로드
+      const loadVoices = () => {
+        const voices = speechSynthesis.getVoices();
+        if (voices.length > 0 && !selectedVoice) {
+          // 여성 음성 우선 선택
+          const koreanFemaleVoice = voices.find(voice => 
+            voice.lang.includes('ko') && 
+            (voice.name.toLowerCase().includes('female') || 
+             voice.name.includes('지수') || 
+             voice.name.includes('유나') ||
+             voice.name.includes('선희'))
+          ) || voices.find(voice => voice.lang.includes('ko'));
+          
+          if (koreanFemaleVoice) {
+            setSelectedVoice(koreanFemaleVoice);
+            console.log('TTS 음성 미리 선택:', koreanFemaleVoice.name);
+          }
+        }
+      };
+      
+      loadVoices();
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+  }, [selectedVoice]);
 
   // 음성 인식 초기화 (웹 Speech 지원 시)
   useEffect(() => {
@@ -1746,6 +1791,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         if (newTime <= 0) {
           console.log('면접 시간 종료 - Step 5로 이동');
           setStep(5);
+          // Step 5로 이동 시 스크롤 복원
+          document.body.style.overflow = 'auto';
+          document.documentElement.style.overflow = 'auto';
           return 0;
         }
         return newTime;
@@ -1759,6 +1807,30 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       document.body.style.overflow = '';
     };
   }, [step, interviewTime, isClient]);
+
+  // Step 5에서 스크롤 복원 (강화)
+  useEffect(() => {
+    if (step === 5 && isClient) {
+      // 면접 완료 화면에서는 스크롤 허용
+      // 여러 방법으로 강제 적용
+      setTimeout(() => {
+        document.body.style.overflow = 'auto';
+        document.body.style.overflowY = 'auto';
+        document.body.style.position = 'relative';
+        document.body.style.height = 'auto';
+        document.documentElement.style.overflow = 'auto';
+        
+        // html 태그에도 적용
+        const htmlElement = document.querySelector('html');
+        if (htmlElement) {
+          htmlElement.style.overflow = 'auto';
+          htmlElement.style.overflowY = 'auto';
+        }
+        
+        console.log('Step 5 - 스크롤 강제 복원됨');
+      }, 100); // 약간의 딜레이로 확실히 적용
+    }
+  }, [step, isClient]);
 
   // Step 0 애니메이션 효과 및 스크롤 제어
   useEffect(() => {
@@ -2225,12 +2297,33 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 console.log('면접 완료 - 현재 대화 기록:', conversationHistory);
                 console.log('대화 기록 상세:', JSON.stringify(conversationHistory, null, 2));
                 
+                // 음성 인식 완전 중단
+                if (recognitionRef.current) {
+                  recognitionRef.current.stop();
+                  recognitionRef.current = null;
+                }
+                if (recognition) {
+                  recognition.stop();
+                }
+                setIsListening(false);
+                setIsRecognitionActive(false);
+                
                 // 완전한 오디오 정리 실행 (대화 기록 보존)
                 completeAudioCleanup(true);
                 
                 // 완료 화면으로 이동
                 console.log('Step 5로 이동, 대화 기록 개수:', conversationHistory.length);
                 setStep(5);
+                // Step 5로 이동 시 스크롤 강제 복원
+                setTimeout(() => {
+                  document.body.style.overflow = 'auto';
+                  document.body.style.overflowY = 'auto';
+                  document.documentElement.style.overflow = 'auto';
+                  const htmlElement = document.querySelector('html');
+                  if (htmlElement) {
+                    htmlElement.style.overflow = 'auto';
+                  }
+                }, 100);
               } else {
                 // 취소한 경우에는 음성 인식을 다시 시작
                 setTimeout(() => {
