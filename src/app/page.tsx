@@ -1520,9 +1520,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         if (isInterviewerSpeakingRef.current) break;
         const text = await recordOnceAndTranscribe();
         const clean = (text || '').trim();
-        if (clean.length >= 2) {
+          if (clean.length >= 2) {
           setIsListening(false);
-          await handleUserResponse(clean);
+          const corrected = await fetch('/api/stt-correct', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: clean, major: selectedMajor, university: selectedUniversity?.name })
+          }).then(r => r.ok ? r.json() : Promise.resolve({ corrected: clean })).catch(() => ({ corrected: clean }));
+          await handleUserResponse((corrected.corrected || clean).trim());
           break;
         }
         // 빈 결과면 짧은 대기 후 재시도
