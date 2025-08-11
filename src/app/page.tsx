@@ -3386,12 +3386,23 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                       5분 이상 충분한 발화량이 확보되어야합니다.
                     </p>
 
-                    <button
-                      onClick={() => changeStepWithTransition(6, 'forward')}
-                      className="mt-6 inline-flex items-center justify-center px-5 py-3 rounded-lg font-medium transition-colors bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                    >
-                      샘플 리포트 보기
-                    </button>
+                    <div className="mt-6 flex items-center gap-3">
+                      <button
+                        onClick={() => changeStepWithTransition(6, 'forward')}
+                        className="inline-flex items-center justify-center px-5 py-3 rounded-lg font-medium transition-colors bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                      >
+                        샘플 리포트 보기
+                      </button>
+                      <button
+                        onClick={() => {
+                          // 면접 다시 보기: Step 3 대기실로 이동
+                          setStep(3);
+                        }}
+                        className="inline-flex items-center justify-center px-5 py-3 rounded-lg font-medium transition-colors bg-white text-black hover:bg-gray-100"
+                      >
+                        면접 다시 보기
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
