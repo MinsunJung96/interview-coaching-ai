@@ -219,6 +219,7 @@ function Home() {
   
   // 스크롤 기반 강조 효과를 위한 상태
   const [highlightedItems, setHighlightedItems] = useState<string[]>([]);
+  const [scrollDirection, setScrollDirection] = useState<'up'|'down'>('up');
   
   // Step transition animation states
   const [isSlideOutLeft, setIsSlideOutLeft] = useState(false);
@@ -2051,12 +2052,22 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       setHighlightedItems(newHighlighted);
     };
 
-    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto') as HTMLElement | null;
     if (scrollContainer) {
+      let lastY = scrollContainer.scrollTop;
+      const dirHandler = () => {
+        const y = scrollContainer.scrollTop;
+        setScrollDirection(y < lastY ? 'up' : 'down');
+        lastY = y;
+      };
       scrollContainer.addEventListener('scroll', handleScroll);
+      scrollContainer.addEventListener('scroll', dirHandler);
       handleScroll(); // 초기 체크
       
-      return () => scrollContainer.removeEventListener('scroll', handleScroll);
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+        scrollContainer.removeEventListener('scroll', dirHandler);
+      };
     }
   }, [step]);
 
@@ -2797,8 +2808,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             )}
           </div>
 
-          {/* Action Buttons - Fixed at bottom */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black">
+          {/* Action Buttons - Show only when scrolling up */}
+          <div className={`fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black transition-transform duration-300 ${
+            scrollDirection === 'up' ? 'translate-y-0' : 'translate-y-full'
+          }`}>
             <button
               onClick={() => {
                 setStep(6); // 분석 리포트 화면으로 이동
@@ -2904,8 +2917,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
             {/* 전공 적합성 섹션 */}
             <div id="major-fit" className="mb-8">
-              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
-                highlightedItems.includes('major-fit') ? 'text-[#ff5500]' : 'text-white'
+              <h2 className={`text-xl font-bold mb-4 ${
+                highlightedItems.includes('major-fit') ? 'text-white' : 'text-white'
               }`}>전공 적합성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
@@ -2970,8 +2983,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
             {/* 학업 역량 섹션 */}
             <div id="academic-capability" className="mb-8">
-              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
-                highlightedItems.includes('academic-capability') ? 'text-[#ff5500]' : 'text-white'
+              <h2 className={`text-xl font-bold mb-4 ${
+                highlightedItems.includes('academic-capability') ? 'text-white' : 'text-white'
               }`}>학업 역량</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
@@ -3036,8 +3049,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
             {/* 인성, 태도 섹션 */}
             <div id="personality-attitude" className="mb-8">
-              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
-                highlightedItems.includes('personality-attitude') ? 'text-[#ff5500]' : 'text-white'
+              <h2 className={`text-xl font-bold mb-4 ${
+                highlightedItems.includes('personality-attitude') ? 'text-white' : 'text-white'
               }`}>인성, 태도</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
@@ -3102,8 +3115,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
             {/* 발전 가능성 섹션 */}
             <div id="growth-potential" className="mb-8">
-              <h2 className={`text-xl font-bold mb-4 transition-colors duration-300 ${
-                highlightedItems.includes('growth-potential') ? 'text-[#ff5500]' : 'text-white'
+              <h2 className={`text-xl font-bold mb-4 ${
+                highlightedItems.includes('growth-potential') ? 'text-white' : 'text-white'
               }`}>발전 가능성</h2>
               <div className="bg-[#121212] border border-[#3D3D3D] rounded-2xl p-6">
                 <p className="text-gray-300 leading-relaxed text-base mb-4">
