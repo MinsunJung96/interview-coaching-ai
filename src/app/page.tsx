@@ -1389,6 +1389,30 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           autoGainControl: true
         } as any
       });
+      // MediaRecorder 미지원(iOS 구버전) 대비 WAV 녹음 경로
+      // @ts-ignore
+      if (typeof MediaRecorder === 'undefined') {
+        const AC: any = (window as any).AudioContext || (window as any).webkitAudioContext;
+        const ctx = new AC();
+        await ctx.resume().catch(() => {});
+        const source = ctx.createMediaStreamSource(stream);
+        const processor = ctx.createScriptProcessor(4096, 1, 1);
+        const samples: Float32Array[] = [];
+        processor.onaudioprocess = (e: any) => {
+          const input = e.inputBuffer.getChannelData(0);
+          samples.push(new Float32Array(input));
+        };
+        source.connect(processor);
+        processor.connect(ctx.destination);
+        await new Promise<void>(res => setTimeout(res, 2000));
+        processor.disconnect();
+        source.disconnect();
+        stream.getTracks().forEach(t => t.stop());
+        const merged = mergeFloat32Arrays(samples);
+        const wavBlob = floatToWavBlob(merged, ctx.sampleRate || 44100);
+        const text = await uploadBlobToServerSTT(wavBlob, 'speech.wav');
+        return text;
+      }
       // iOS Safari는 audio/webm 미지원일 수 있어 가용한 타입을 우선 선택
       const preferredTypes = [
         'audio/webm;codecs=opus',
@@ -1439,6 +1463,48 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       throw e;
     }
   };
+
+  function mergeFloat32Arrays(chunks: Float32Array[]): Float32Array {
+    const total = chunks.reduce((acc, c) => acc + c.length, 0);
+    const result = new Float32Array(total);
+    let offset = 0;
+    for (const c of chunks) {
+      result.set(c, offset);
+      offset += c.length;
+    }
+    return result;
+  }
+
+  function floatToWavBlob(float32: Float32Array, sampleRate: number): Blob {
+    const buffer = new ArrayBuffer(44 + float32.length * 2);
+    const view = new DataView(buffer);
+    const writeString = (offset: number, str: string) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+    };
+    const numChannels = 1;
+    const bitsPerSample = 16;
+    const byteRate = (sampleRate * numChannels * bitsPerSample) / 8;
+
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + float32.length * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, (numChannels * bitsPerSample) / 8, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeString(36, 'data');
+    view.setUint32(40, float32.length * 2, true);
+    let offset = 44;
+    for (let i = 0; i < float32.length; i++, offset += 2) {
+      let s = Math.max(-1, Math.min(1, float32[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+    }
+    return new Blob([view], { type: 'audio/wav' });
+  }
 
   // 서버 STT 연속 루프 (iOS 폴백)
   const startServerSttLoop = async (context: string) => {
