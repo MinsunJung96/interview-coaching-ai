@@ -418,6 +418,67 @@ function Home() {
   const cleanupFunctionsRef = useRef<(() => void)[]>([]); // 클린업 함수들을 저장할 ref
   const isInterviewerSpeakingRef = useRef(false); // 면접관 말하기 상태 ref 추가
   
+  // 새 면접 시작을 위한 완전한 초기화 함수
+  const resetForNewInterview = () => {
+    console.log('[RESET] 새 면접을 위한 완전 초기화 시작');
+    
+    // 1. 음성/오디오 정리
+    completeAudioCleanup(false);
+    
+    // 2. 면접 관련 모든 상태 초기화
+    setStep(1);
+    setSelectedUniversity(null);
+    setSelectedMajor("");
+    setSearchTerm("");
+    setIsDropdownOpen(false);
+    setCountdown(3);
+    setIsTimerComplete(false);
+    setInterviewTime(600);
+    
+    // 3. 대화 기록 및 사용자 프로필 초기화
+    setConversationHistory([]);
+    setUserResponseSummary([]);
+    setCurrentInterviewerText("");
+    setInterimTranscript("");
+    
+    // 4. 면접 진행 상태 초기화
+    setHasAskedFirstQuestion(false);
+    setIsInterviewStarted(false);
+    setCurrentPhase('intro');
+    setLastPhase('intro');
+    setPhaseTransitionPending(false);
+    setForcePhaseTransition(false);
+    setLastTransitionTime(600);
+    
+    // 5. 음성 인식 상태 초기화
+    setIsListening(false);
+    setIsRecognitionActive(false);
+    setIsMicOn(true);
+    setNeedsAudioUnlock(false);
+    
+    // 6. 면접관 상태 초기화
+    setIsInterviewerSpeaking(false);
+    setIsInterviewerMouthOpen(false);
+    setCurrentInterviewerVideo('interviewer-listening');
+    setInterviewStatus('waiting');
+    
+    // 7. 처리 상태 초기화
+    setIsProcessingResponse(false);
+    
+    // 8. UI 상태 초기화
+    setShowReportBanner(false);
+    setShowSampleModal(false);
+    setShowPremiumModal(false);
+    setShowExitModal(false);
+    setHighlightedItems([]);
+    
+    // 9. 스크롤 복원
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    
+    console.log('[RESET] 초기화 완료');
+  };
+
   // 완전한 음성/오디오 정리 함수
   const completeAudioCleanup = (preserveConversation: boolean = false) => {
     console.log('[CLEANUP] 완전한 오디오 정리 시작');
@@ -835,11 +896,13 @@ function Home() {
 현재 면접 단계: ${phaseInfo.name}
 가이드라인: ${phaseInfo.guideline}
 ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 응답을 "${transitionMessage}"로 시작한 후, ${phaseInfo.name} 관련 새로운 질문을 이어서 하세요.\n예시: "${transitionMessage} [새로운 질문]"\n` : ''}
+${interviewTime <= 15 ? '\n[중요] 면접이 곧 종료됩니다! 마무리 멘트를 준비하세요.\n' : ''}
 
 지원자 프로필:${userContext}
 
 면접 진행 원칙:
-1. ${transitionMessage ? `[필수] "${transitionMessage}"로 시작하고 바로 새로운 단계의 질문으로 이어가세요.` : '현재 단계에 맞는 질문을 하되, 지원자의 이전 답변과 자연스럽게 연결하세요.'}
+${interviewTime <= 15 ? '1. [필수] 면접 마무리 멘트를 하세요. 수고하셨다는 인사와 함께 긍정적인 피드백을 포함하세요.' : 
+`1. ${transitionMessage ? `[필수] "${transitionMessage}"로 시작하고 바로 새로운 단계의 질문으로 이어가세요.` : '현재 단계에 맞는 질문을 하되, 지원자의 이전 답변과 자연스럽게 연결하세요.'}`}
 2. ${transitionMessage ? '전환 메시지 후 즉시 새로운 주제의 질문을 하세요. 이전 답변에 대한 추가 질문은 하지 마세요.' : '너무 갑작스럽게 주제를 바꾸지 마세요.'}
 3. 지원자가 언급한 내용을 기억하고 필요시 참조하세요.
 4. 압박 질문은 피하고, 지원자의 잠재력을 끌어내는 질문을 하세요.
@@ -1790,6 +1853,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         const newTime = prev - 1;
         if (newTime <= 0) {
           console.log('면접 시간 종료 - Step 5로 이동');
+          
+          // 면접 종료 시 음성 관련 모든 것 중단
+          completeAudioCleanup();
+          
           setStep(5);
           // Step 5로 이동 시 스크롤 복원
           document.body.style.overflow = 'auto';
@@ -1808,9 +1875,43 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     };
   }, [step, interviewTime, isClient]);
 
-  // Step 5에서 스크롤 복원 (강화)
+  // Step 5에서 스크롤 복원 및 음성 완전 중단 (강화)
   useEffect(() => {
     if (step === 5 && isClient) {
+      // 면접 완료 시 음성 관련 모든 것 완전 중단 (이중 안전장치)
+      console.log('[Step 5] 면접 완료 - 음성 기능 완전 중단');
+      
+      // 1. 음성 인식 중단
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+          recognitionRef.current = null;
+          console.log('[Step 5] 음성 인식 중단 완료');
+        } catch (e) {
+          console.log('[Step 5] 음성 인식 이미 중단됨');
+        }
+      }
+      
+      // 2. 음성 합성 중단
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+        console.log('[Step 5] 음성 합성 중단 완료');
+      }
+      
+      // 3. 모든 오디오 엘리먼트 중단
+      const audioElements = document.querySelectorAll('audio');
+      audioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+      });
+      
+      // 4. 상태 초기화
+      setIsListening(false);
+      setIsRecognitionActive(false);
+      setIsInterviewerSpeaking(false);
+      setIsProcessingResponse(false);
+      
       // 면접 완료 화면에서는 스크롤 허용
       // 여러 방법으로 강제 적용
       setTimeout(() => {
@@ -2889,10 +2990,18 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 5: Interview Completion */}
       {step === 5 && (
-        <div key="step-5" className={getStepClassName("flex-1 flex flex-col bg-black text-white relative")}>
+        <div key="step-5" className={getStepClassName("fixed inset-0 flex flex-col bg-black text-white")}>
+          
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+            <h2 className="text-lg font-semibold">면접 완료</h2>
+            <div className="text-sm text-gray-400">
+              총 {conversationHistory.length}개 대화
+            </div>
+          </div>
 
           {/* Chat History */}
-          <div ref={completionScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
+          <div ref={completionScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
 
             {conversationHistory.length > 0 ? (
               conversationHistory.map((item, index) => {
@@ -2927,10 +3036,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
             )}
           </div>
 
-          {/* Action Buttons - Show only when scrolling up */}
-          <div className={`fixed bottom-0 left-0 right-0 p-4 space-y-3 border-t border-gray-800 bg-black transition-transform duration-300 ${
-            scrollDirection === 'up' ? 'translate-y-0' : 'translate-y-full'
-          }`}>
+          {/* Action Buttons - Always visible at bottom */}
+          <div className="p-4 space-y-3 border-t border-gray-800 bg-black">
             <button
               onClick={() => {
                 setStep(6); // 분석 리포트 화면으로 이동
@@ -3807,21 +3914,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 </button>
                 <button 
                   onClick={() => {
-                    setShowExitModal(false);
-                    // 완전한 오디오 정리 실행 (대화 기록도 초기화)
-                    completeAudioCleanup(false);
-                    
-                    setStep(1);
-                    setSelectedUniversity(null);
-                    setSelectedMajor("");
-                    setConversationHistory([]);
-                    setInterviewTime(600);
-                    setHasAskedFirstQuestion(false);
-                    setIsInterviewStarted(false);
-                    setUserResponseSummary([]);
-                    setCurrentPhase('intro');
-                    setLastPhase('intro');
-                    setPhaseTransitionPending(false);
+                    // 새 면접을 위한 완전 초기화
+                    resetForNewInterview();
                   }}
                   className="flex-1 bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
