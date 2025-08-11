@@ -1621,6 +1621,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   useEffect(() => {
     if (step !== 4 || interviewTime <= 0 || !isClient) return;
     console.log('Step 4 면접 타이머 시작 - isClient:', isClient);
+    // 면접 화면에서는 스크롤 락
+    document.body.style.overflow = 'hidden';
     
     const timer = setInterval(() => {
       setInterviewTime((prev) => {
@@ -1637,6 +1639,8 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
     return () => {
       clearInterval(timer);
       console.log('Step 4 면접 타이머 클린업');
+      // 스텝 이탈 시 스크롤 원복
+      document.body.style.overflow = '';
     };
   }, [step, interviewTime, isClient]);
 
@@ -2442,7 +2446,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
 
       {/* Step 4: Interview Screen */}
       {step === 4 && (
-        <div key="step-4" className={getStepClassName("flex-1 flex flex-col relative")}>
+        <div key="step-4" className={getStepClassName("flex-1 flex flex-col relative min-h-screen overflow-hidden")}>
           {/* Full Screen Video Background */}
           <div className="fixed inset-0 z-0">
             <video
