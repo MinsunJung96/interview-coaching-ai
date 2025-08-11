@@ -180,6 +180,8 @@ function Home() {
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [needsAudioUnlock, setNeedsAudioUnlock] = useState(false);
   const pendingAudioUrlRef = useRef<string | null>(null);
+  const serverSttLoopActiveRef = useRef(false);
+  const supportsWebSpeech = typeof window !== 'undefined' && (('webkitSpeechRecognition' in window) || ('SpeechRecognition' in window));
   const [isListening, setIsListening] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<{message: string, timestamp: number}[]>([]);
   const [userResponseSummary, setUserResponseSummary] = useState<string[]>([]); // 사용자 응답 요약 누적
@@ -1045,25 +1047,27 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         setInterviewStatus('user_turn');
         // setStatusMessage('이제 답변해 주세요');
         
-        // 6. 음성 인식 즉시 재시작
+        // 6. 음성 인식/서버 STT 재시작
         console.log('[AUDIO] 음성 인식 재시작 시도');
-        const started = startRecognitionSafely('면접관 말하기 끝');
-        if (started) {
-          console.log('[AUDIO] 음성 인식 재시작 성공');
-          setInterviewStatus('listening');
-          // setStatusMessage('듣고 있습니다...');
-          setIsListening(true); // 추가: isListening 상태도 설정
+        if (supportsWebSpeech) {
+          const started = startRecognitionSafely('면접관 말하기 끝');
+          if (started) {
+            console.log('[AUDIO] 음성 인식 재시작 성공');
+            setInterviewStatus('listening');
+            setIsListening(true);
+          } else {
+            console.error('[AUDIO] 음성 인식 재시작 실패');
+            setTimeout(() => {
+              const retryStarted = startRecognitionSafely('면접관 말하기 끝 - 재시도');
+              if (retryStarted) {
+                setInterviewStatus('listening');
+                setIsListening(true);
+              }
+            }, 1000);
+          }
         } else {
-          console.error('[AUDIO] 음성 인식 재시작 실패');
-          // 실패 시 1초 후 재시도
-          setTimeout(() => {
-            const retryStarted = startRecognitionSafely('면접관 말하기 끝 - 재시도');
-            if (retryStarted) {
-              setInterviewStatus('listening');
-              // setStatusMessage('듣고 있습니다...');
-              setIsListening(true); // 추가: isListening 상태도 설정
-            }
-          }, 1000);
+          // iOS 폴백: 서버 STT 루프 시작
+          startServerSttLoop('면접관 말하기 끝');
         }
         
         // 7. 단계 전환 체크는 나중에 비동기로 처리
@@ -1378,7 +1382,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   // 미지원 브라우저용: 마이크에서 잠시 녹음 후 서버로 전송
   const recordOnceAndTranscribe = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } as any
+      });
       // iOS Safari는 audio/webm 미지원일 수 있어 가용한 타입을 우선 선택
       const preferredTypes = [
         'audio/webm;codecs=opus',
@@ -1427,6 +1437,36 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       });
     } catch (e) {
       throw e;
+    }
+  };
+
+  // 서버 STT 연속 루프 (iOS 폴백)
+  const startServerSttLoop = async (context: string) => {
+    if (serverSttLoopActiveRef.current) return;
+    serverSttLoopActiveRef.current = true;
+    console.log('[ServerSTT] 루프 시작:', context);
+    setIsListening(true);
+    try {
+      // 최대 3회까지 시도 (약 12초)
+      for (let i = 0; i < 3; i++) {
+        if (!serverSttLoopActiveRef.current) break;
+        if (isInterviewerSpeakingRef.current) break;
+        const text = await recordOnceAndTranscribe();
+        const clean = (text || '').trim();
+        if (clean.length >= 2) {
+          setIsListening(false);
+          await handleUserResponse(clean);
+          break;
+        }
+        // 빈 결과면 짧은 대기 후 재시도
+        await new Promise(r => setTimeout(r, 500));
+      }
+    } catch (err) {
+      console.error('[ServerSTT] 루프 에러:', err);
+      setIsListening(false);
+    } finally {
+      serverSttLoopActiveRef.current = false;
+      console.log('[ServerSTT] 루프 종료');
     }
   };
 
@@ -1496,27 +1536,14 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       }
       setIsMicOn(true);
       // Web Speech 지원 시: 기존 흐름
-      if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      if (supportsWebSpeech) {
         const started = startRecognitionSafely('마이크 버튼 클릭');
         if (!started && !recognition) {
           console.error('음성 인식 객체가 없습니다.');
         }
       } else {
         // 미지원(iOS Safari 등): 짧게 녹음 후 서버 STT로 전송
-        try {
-          setIsListening(true);
-          const text = await recordOnceAndTranscribe();
-          setIsListening(false);
-          if (text && text.trim()) {
-            await handleUserResponse(text.trim());
-          } else {
-            console.log('서버 STT 결과가 비어 있음');
-          }
-        } catch (e) {
-          setIsListening(false);
-          console.error('서버 STT 에러:', e);
-          alert('음성 인식이 이 브라우저에서 직접 지원되지 않아 서버로 전송했지만 실패했습니다.');
-        }
+        startServerSttLoop('마이크 버튼 클릭');
       }
     } else if (isMicOn && isListening) {
       // 마이크 끄기 - 음성 인식 중지
