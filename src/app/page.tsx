@@ -3145,7 +3145,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   onClick={() => setShowSampleModal(false)}
                   className="flex-1 bg-gray-600 hover:bg-gray-500 text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
-                  샘플 이어서 보기
+                  샘플 보기
                 </button>
                 <button 
                   onClick={() => {
@@ -3154,7 +3154,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                   }}
                   className="flex-1 bg-[#ff5500] hover:bg-[#e64a00] text-white py-3 px-4 rounded-lg font-medium transition-colors"
                 >
-                  네, 받아볼래요
+                  리포트 받기
                 </button>
               </div>
             </div>
