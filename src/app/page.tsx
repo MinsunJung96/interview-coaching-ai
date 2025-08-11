@@ -178,6 +178,8 @@ function Home() {
   const [interviewTime, setInterviewTime] = useState(600); // 10분 = 600초
   const [isMicOn, setIsMicOn] = useState(true);
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
+  const [needsAudioUnlock, setNeedsAudioUnlock] = useState(false);
+  const pendingAudioUrlRef = useRef<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<{message: string, timestamp: number}[]>([]);
   const [userResponseSummary, setUserResponseSummary] = useState<string[]>([]); // 사용자 응답 요약 누적
@@ -1004,6 +1006,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       );
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
+      // iOS 재생 호환성 향상
+      audio.preload = 'auto';
+      (audio as any).playsInline = true;
 
       // Promise를 통해 재생 완료를 추적
       return new Promise<void>((resolve) => {
@@ -1092,8 +1097,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       };
 
       // 오디오 재생 시작
-      audio.play().catch(error => {
+      audio.play().then(() => {
+        setNeedsAudioUnlock(false);
+      }).catch(error => {
         console.error('[AUDIO] 오디오 재생 실패:', error);
+        // 사용자 제스처 필요 시 안내 배너 표시 후 나중에 재시도
+        pendingAudioUrlRef.current = audioUrl;
+        setNeedsAudioUnlock(true);
         resolve();
       });
     });
@@ -2473,7 +2483,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
           {/* Main Interview Content Area */}
           <div className="flex-1 relative z-10">
             
-            {/* 상태 표시 바 */}
+          {/* 상태 표시 바 */}
             <div className="absolute top-4 left-4 right-4 z-20">
               <div className="bg-black/70 backdrop-blur-sm rounded-xl px-4 py-3 shadow-lg">
                 {/* 면접 단계, 상태, 타이머를 같은 줄에 배치 */}
@@ -2529,6 +2539,28 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
                 
 
                 
+                {/* iOS 오디오 언락 안내 */}
+                {needsAudioUnlock && (
+                  <div className="bg-yellow-600/30 text-yellow-200 rounded-lg p-2 mt-2 flex items-center justify-between">
+                    <span className="text-sm">iOS에서 음성 재생을 위해 버튼을 눌러주세요.</span>
+                    <button
+                      onClick={() => {
+                        const url = pendingAudioUrlRef.current;
+                        if (!url) { setNeedsAudioUnlock(false); return; }
+                        const a = new Audio(url);
+                        (a as any).playsInline = true;
+                        a.play().finally(() => {
+                          setNeedsAudioUnlock(false);
+                          pendingAudioUrlRef.current = null;
+                        });
+                      }}
+                      className="ml-3 px-3 py-1 bg-white text-black rounded-md text-sm"
+                    >
+                      재생
+                    </button>
+                  </div>
+                )}
+
                 {/* 임시 텍스트 표시 */}
                 {interimTranscript && (
                   <div className="bg-white/10 rounded-lg p-2 mt-2">
