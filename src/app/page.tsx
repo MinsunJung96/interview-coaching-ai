@@ -220,6 +220,7 @@ function Home() {
   // 스크롤 기반 강조 효과를 위한 상태
   const [highlightedItems, setHighlightedItems] = useState<string[]>([]);
   const [scrollDirection, setScrollDirection] = useState<'up'|'down'>('up');
+  const completionScrollRef = useRef<HTMLDivElement | null>(null);
   
   // Step transition animation states
   const [isSlideOutLeft, setIsSlideOutLeft] = useState(false);
@@ -2074,6 +2075,20 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         scrollContainer.removeEventListener('scroll', dirHandler);
       };
     }
+
+    // Step 5 전용: 완료 화면 스크롤 방향 감지 (정확한 컨테이너에 바인딩)
+    if (step === 5 && completionScrollRef.current) {
+      setScrollDirection('up');
+      const el = completionScrollRef.current;
+      let lastY = el.scrollTop;
+      const onScroll = () => {
+        const y = el.scrollTop;
+        setScrollDirection(y < lastY ? 'up' : 'down');
+        lastY = y;
+      };
+      el.addEventListener('scroll', onScroll);
+      return () => el.removeEventListener('scroll', onScroll);
+    }
   }, [step]);
 
   // 모달이 표시될 때 스크롤 비활성화
@@ -2778,7 +2793,7 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         <div key="step-5" className={getStepClassName("flex-1 flex flex-col bg-black text-white relative")}>
 
           {/* Chat History */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
+          <div ref={completionScrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
 
             {conversationHistory.length > 0 ? (
               conversationHistory.map((item, index) => {
