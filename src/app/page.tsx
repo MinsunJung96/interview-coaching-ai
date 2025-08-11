@@ -808,6 +808,12 @@ function Home() {
       return;
     }
     
+    // 시간 초과 시 응답 차단 (-20초 이후는 완전 차단)
+    if (interviewTime <= -20) {
+      console.log('면접 시간 초과 - 더 이상 응답 처리 안함');
+      return;
+    }
+    
     // 빈 입력이거나 너무 짧으면 알림 표시
     if (!userInput || userInput.trim().length < 2) {
       console.log('입력이 너무 짧음, 무시됨');
@@ -949,9 +955,17 @@ interviewTime <= 0 ? '1. [필수] 면접 마무리 멘트를 하세요. "네, �
         setPhaseTransitionPending(false);
       }
       
-      // 마무리 멘트 감지 (면접 종료)
-      if (aiResponse.includes('여기까지입니다') || aiResponse.includes('수고하셨습니다') || 
-          aiResponse.includes('면접을 마치겠습니다') || aiResponse.includes('면접은 여기까지')) {
+      // 마무리 멘트 감지 (면접 종료) - 더 많은 패턴 추가
+      const closingPhrases = [
+        '여기까지입니다', '수고하셨습니다', '면접을 마치겠습니다', '면접은 여기까지',
+        '오늘 면접은', '고생하셨습니다', '감사합니다', '좋은 결과', '기대하겠습니다',
+        '면접 보시느라', '긴장된 상황에서도', '잠재력이', '결과를 기다려'
+      ];
+      
+      const hasClosingPhrase = closingPhrases.some(phrase => aiResponse.includes(phrase));
+      
+      // 시간이 0 이하이고 마무리 관련 문구가 있으면 종료
+      if (interviewTime <= 0 && hasClosingPhrase) {
         console.log('마무리 멘트 감지 - 면접 종료 준비');
         
         // 면접관 음성 합성 후 종료
@@ -1886,17 +1900,29 @@ interviewTime <= 0 ? '1. [필수] 면접 마무리 멘트를 하세요. "네, �
       setInterviewTime((prev) => {
         const newTime = prev - 1;
         
+        // 30초 초과 시 강제 종료 (10분 30초)
+        if (newTime <= -30) {
+          console.log('면접 시간 초과 - 강제 종료');
+          clearInterval(timer);
+          
+          // 모든 음성 즉시 중단하고 종료
+          completeAudioCleanup();
+          setStep(5);
+          document.body.style.overflow = 'auto';
+          document.documentElement.style.overflow = 'auto';
+          return -30; // 더 이상 감소하지 않음
+        }
+        
         // 시간이 0이 되었을 때
-        if (newTime <= 0) {
+        if (newTime <= 0 && newTime > -30) {
           // 대화 중인지 확인 (면접관이 말하는 중이거나 사용자가 응답 중이거나 처리 중)
           if (isInterviewerSpeaking || isListening || isProcessingResponse) {
-            console.log('면접 시간 종료 - 대화 완료 대기 중...');
-            // 대화가 끝날 때까지 기다림 (음수로 계속 카운트)
+            console.log(`면접 시간 종료 - 대화 완료 대기 중... (${newTime}초)`);
+            // 대화가 끝날 때까지 기다림 (음수로 계속 카운트, 최대 -30초까지)
             return newTime - 1;
           } else {
             console.log('면접 시간 종료 - 마무리 준비');
             // 대화가 끝났으면 마무리 진행
-            // 타이머는 계속 음수로 진행하되, AI가 마무리 멘트를 하도록 유도
             return newTime - 1;
           }
         }
