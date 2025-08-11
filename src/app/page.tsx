@@ -1353,9 +1353,9 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   }, []);
 
   // iOS Safari 등 Web Speech 미지원 시 서버 STT 폴백 업로더
-  const uploadBlobToServerSTT = async (blob: Blob): Promise<string> => {
+  const uploadBlobToServerSTT = async (blob: Blob, fileName: string): Promise<string> => {
     const formData = new FormData();
-    formData.append('audio', blob, 'speech.webm');
+    formData.append('audio', blob, fileName);
     const res = await fetch('/api/stt', { method: 'POST', body: formData });
     if (!res.ok) {
       const txt = await res.text();
@@ -1369,7 +1369,27 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
   const recordOnceAndTranscribe = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      // iOS Safari는 audio/webm 미지원일 수 있어 가용한 타입을 우선 선택
+      const preferredTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/m4a',
+        'audio/aac'
+      ];
+      let chosenType = '' as string;
+      for (const t of preferredTypes) {
+        // @ts-ignore
+        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) {
+          chosenType = t;
+          break;
+        }
+      }
+      if (!chosenType) {
+        // 타입을 지정하지 않고 시도
+        chosenType = '';
+      }
+      const mediaRecorder = chosenType ? new MediaRecorder(stream, { mimeType: chosenType }) : new MediaRecorder(stream);
       const chunks: BlobPart[] = [];
       return await new Promise<string>((resolve, reject) => {
         mediaRecorder.ondataavailable = (e) => {
@@ -1377,8 +1397,13 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
         };
         mediaRecorder.onstop = async () => {
           try {
-            const blob = new Blob(chunks, { type: 'audio/webm' });
-            const text = await uploadBlobToServerSTT(blob);
+            const blobType = chosenType || (chunks[0] as any)?.type || 'audio/webm';
+            const blob = new Blob(chunks, { type: blobType });
+            // 확장자 매핑
+            const ext = blobType.includes('mp4') || blobType.includes('m4a') ? 'm4a'
+                      : blobType.includes('aac') ? 'aac'
+                      : 'webm';
+            const text = await uploadBlobToServerSTT(blob, `speech.${ext}`);
             resolve(text);
           } catch (err) {
             reject(err);
