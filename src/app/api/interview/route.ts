@@ -107,18 +107,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-5', // GPT-5로 업그레이드
-        messages: [
-          {
-            role: 'system',
-            content: `너는 40대 여성 대학 면접관이다. 지원자의 대학과 전공에 맞춰 질문하며, 매 질문은 상황 설명과 이유/방법 요구를 함께 포함한다.
+    // GPT-5 시도, 실패 시 GPT-4o로 폴백
+    let modelToUse = 'gpt-5'; // 먼저 GPT-5 시도
+    let response;
+    
+    try {
+      response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: modelToUse,
+          messages: [
+            {
+              role: 'system',
+              content: `너는 40대 여성 대학 면접관이다. 지원자의 대학과 전공에 맞춰 질문하며, 매 질문은 상황 설명과 이유/방법 요구를 함께 포함한다.
 
 [면접 대상]
 - 대학: ${university ?? '대학'}
@@ -149,10 +154,64 @@ export async function POST(request: NextRequest) {
       }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('OpenAI API 에러:', response.status, errorData);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error(`${modelToUse} API 에러:`, response.status, errorData);
+        
+        // GPT-5 실패 시 GPT-4o로 재시도
+        if (modelToUse === 'gpt-5' && (response.status === 400 || response.status === 404)) {
+          console.log('GPT-5 실패, GPT-4o로 폴백 시도...');
+          modelToUse = 'gpt-4o';
+          
+          response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: modelToUse,
+              messages,
+              max_tokens: 300,
+              temperature: 0.8,
+            }),
+          });
+          
+          if (!response.ok) {
+            const fallbackError = await response.text();
+            console.error('GPT-4o 폴백도 실패:', response.status, fallbackError);
+            throw new Error(`Both GPT-5 and GPT-4o failed: ${response.status}`);
+          }
+        } else {
+          throw new Error(`OpenAI API error: ${response.status}`);
+        }
+      }
+    } catch (error) {
+      // 첫 번째 시도가 실패한 경우 처리
+      if (modelToUse === 'gpt-5' && error instanceof Error && error.message.includes('400')) {
+        console.log('GPT-5 연결 실패, GPT-4o로 재시도...');
+        modelToUse = 'gpt-4o';
+        
+        response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: modelToUse,
+            messages,
+            max_tokens: 300,
+            temperature: 0.8,
+          }),
+        });
+      } else {
+        throw error;
+      }
+    }
+    
+    if (!response || !response.ok) {
+      throw new Error('API 호출 실패');
     }
 
     const data = await response.json();

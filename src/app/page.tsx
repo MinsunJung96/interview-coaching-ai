@@ -657,7 +657,10 @@ function Home() {
         };
         
         recog.onerror = (event: any) => {
-          console.error('❌ 음성 인식 에러:', event.error);
+          // aborted와 no-speech는 정상적인 상황이므로 에러 로그 제외
+          if (event.error !== 'aborted' && event.error !== 'no-speech') {
+            console.error('❌ 음성 인식 에러:', event.error);
+          }
           setIsListening(false);
           setIsRecognitionActive(false);
         };
@@ -1323,7 +1326,10 @@ ${transitionMessage ? `\n[중요] 단계 전환이 필요합니다!\n반드시 �
       };
 
       recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
+        // aborted는 의도적으로 중단한 것이므로 에러 로그 제외
+        if (event.error !== 'aborted' && event.error !== 'no-speech') {
+          console.error('Speech recognition error:', event.error);
+        }
         setIsListening(false);
         
         // 권한 관련 에러 처리
